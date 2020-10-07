@@ -23,4 +23,4 @@ make: ${SRC_FILES}
 	@$(CC) ${COMPILATION_EXTENSIONS}  $(BIN_DIR)/${RECEIVER_EXECUTABLE} ${RECEIVER_SRC}
 
 clean:
-	@rm -f bin/*
+	@rm -f {BIN_DIR}/*

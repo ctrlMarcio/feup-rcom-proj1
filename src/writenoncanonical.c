@@ -5,6 +5,10 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "serial_port.h"
 
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
@@ -16,12 +20,12 @@ volatile int STOP=FALSE;
 
 int main(int argc, char** argv)
 {
-    int fd,c, res;
+    // int c;
     struct termios oldtio,newtio;
     char buf[255];
-    int i, sum = 0, speed = 0;
+    // int sum = 0, speed = 0;
 
-    if ((argc < 2) || ((strcmp("/dev/ttyS10", argv[1]) != 0) && (strcmp("/dev/ttyS11", argv[1]) != 0)))
+    if ((argc < 2) || ((strcmp("/dev/ttyS0", argv[1]) != 0) && (strcmp("/dev/ttyS1", argv[1]) != 0)))
     {
       printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
       exit(1);
@@ -33,7 +37,7 @@ int main(int argc, char** argv)
   */
 
 
-    fd = open(argv[1], O_RDWR | O_NOCTTY );
+    int fd = open(argv[1], O_RDWR | O_NOCTTY );
     if (fd <0) {perror(argv[1]); exit(-1); }
 
     if ( tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
@@ -61,29 +65,29 @@ int main(int argc, char** argv)
 
     printf("New termios structure set\n");
 
-    // get the initial string
-    char string[255];
-    fgets(string, 255, stdin);
+    // SET trama message
+    unsigned char flag = SET_FLAG;
+    unsigned char address = ADDRESS_SENDER_RECEIVER;
+    unsigned char control = CONTROL_SET;
+    unsigned char bcc = XOR(address, control);   
+ 
+    unsigned char packet[5] = {flag, address, control, bcc, flag};
     
-    // sends the string
-    res = write(fd,string,255);
+    // sends the set
+    int res = write(fd,packet,sizeof(packet));
     printf("%d bytes sent\n", res);
 
     // receives the answer
-    char received_string[255];
-    i = 0;
-
+    int i = 0;
     while (STOP == FALSE)
     {                         /* loop for input */
       res = read(fd, buf, 1); /* returns after 1 char have been input */
-      received_string[i] = buf[0];
-      if (buf[0] == '\0')
+      packet[i] = buf[0];
+      printf("%X\n", buf[0]);
+      if (packet[0] && buf[0] == packet[0]) // TEMP state machine
         STOP = TRUE;
       i++;
     }
-
-    // prints the answer
-    printf("%s\n", received_string);
 
     sleep(1);
     if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {

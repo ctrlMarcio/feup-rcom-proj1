@@ -5,6 +5,9 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #define BAUDRATE B38400
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
@@ -15,7 +18,7 @@ volatile int STOP=FALSE;
 
 int main(int argc, char** argv)
 {
-    int fd,c, res;
+    // int c;
     struct termios oldtio,newtio;
     char buf[255];
 
@@ -30,8 +33,7 @@ int main(int argc, char** argv)
     because we don't want to get killed if linenoise sends CTRL-C.
     */
 
-
-    fd = open(argv[1], O_RDWR | O_NOCTTY );
+    int fd = open(argv[1], O_RDWR | O_NOCTTY);
     if (fd <0) {perror(argv[1]); exit(-1); }
 
     if ( tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
@@ -62,6 +64,7 @@ int main(int argc, char** argv)
     // gets the string
     char string[255];
     unsigned int i=0;
+    int res;
 
     while (STOP==FALSE) { /* loop for input */
         res = read(fd,buf,1); /* returns after 1 char have been input */
