@@ -12,12 +12,11 @@
 #include "../error/error.h"
 #include "../util/serial_port.h"
 #include "../util/util.h"
+#include "../util/state_machine.h"
 
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
-
-volatile int STOP = FALSE;
 
 int count = 0, success = 0;
 
@@ -76,16 +75,19 @@ int read_answer(int fd) {
     success = 1;
     int i = 0;
     
+    MessageConstruct ua = { .flag = HANDSHAKE_FLAG, .address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_UA};
+    enum set_state state = START;
+
     char buf[255] = {0};
 
-    while (success) {               /* loop for input */
-        int res = read(fd, buf, 1); /* returns after 1 char have been input */
+    while (success) {
+        int res = read(fd, buf, 1);
         if (res < 0)
             continue;
         answer_packet[i] = buf[0];
-        //printf("%X\n", buf[0]);
+        update_state(&state, answer_packet[i], ua);
 
-        if (i > 0 && answer_packet[0] && buf[0] == answer_packet[0])  // FIXME
+        if (state == STOP)
         {
             success = 1;
             break;

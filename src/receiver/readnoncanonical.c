@@ -12,14 +12,13 @@
 #include "readnoncanonical.h"
 #include "../util/serial_port.h"
 #include "../util/util.h"
+#include "../util/state_machine.h"
 #include "../error/error.h"
 
 #define BAUDRATE B38400
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 #define FALSE 0
 #define TRUE 1
-
-volatile int STOP = FALSE;
 
 int open_reading_serial_port(char *port, struct termios *oldtio) {
     struct termios newtio;
@@ -61,13 +60,15 @@ void read_set_packet(int fd) {
     unsigned char request_packet[5];
     char buf[255];
 
+    MessageConstruct set = { .flag = HANDSHAKE_FLAG, .address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_SET};
+    enum set_state state = START;
+
     unsigned int i = 0;
-    while (STOP == FALSE) {     /* loop for input */
-        read(fd, buf, 1); /* returns after 1 char have been input */
+    while (state != STOP) {    
+        read(fd, buf, 1);
         request_packet[i] = buf[0];
-        printf("%X\n", buf[0]); // test
-        if (i > 0 && request_packet[0] && buf[0] == request_packet[0])  // FIXME TEMP state machine
-            STOP = TRUE;
+        printf("%X\n", request_packet[i]); // TEST
+        update_state(&state, request_packet[i], set);
         i++;
     }
 }

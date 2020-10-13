@@ -4,6 +4,8 @@
  * @date    2020-10-11
  */
 
+#pragma once
+
 /**
  * @brief States the beginning and end of an handshake type of message, i.e. SET and UA messages.
  */
@@ -30,3 +32,9 @@
  * 
  */
 #define CONTROL_UA 0X07
+
+typedef struct MessageConstructor {
+    char flag;
+    char address;
+    char control;
+} MessageConstruct;

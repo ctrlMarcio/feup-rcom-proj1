@@ -25,10 +25,9 @@ int main(int argc, char **argv) {
 
     unsigned char set_message[5];
     define_set_packet(set_message);
-    printf("%X %X %X %X %X\n", set_message[0], set_message[1], set_message[2], set_message[3], set_message[4]);
 
     int connected = attempt_handshake(fd, set_message, NR_ATTEMPTS, TIMEOUT);
-    printf("\n\n%d\n\n", connected);
+    printf("\n\nConnected: %d\n\n", connected);
 
     if ((res = terminate_connection(fd, &oldtio)))
         return res;

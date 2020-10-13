@@ -7,7 +7,7 @@
 /**
  * @brief Calculates a bitwise XOR between two numbers.
  */
-#define XOR(first, second) first ^ second
+#define XOR(first, second) (first ^ second)
 
 /**
  * @brief Defines the FALSE boolean.
