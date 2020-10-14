@@ -63,11 +63,33 @@ int open_writing_serial_port(char *port, struct termios *oldtio) {
 }
 
 void define_set_packet(unsigned char *set_packet) {
-    set_packet[0] = HANDSHAKE_FLAG;
+    set_packet[0] = PACKET_FLAG;
     set_packet[1] = ADDRESS_SENDER_RECEIVER;
     set_packet[2] = CONTROL_SET;
     set_packet[3] = XOR(ADDRESS_SENDER_RECEIVER, CONTROL_SET);
-    set_packet[4] = HANDSHAKE_FLAG;
+    set_packet[4] = PACKET_FLAG;
+}
+
+int define_message_packet(unsigned char *message, int control_setter, unsigned char* data){
+
+    message[0]=PACKET_FLAG;
+    message[1]=ADDRESS_SENDER_RECEIVER;
+    if(control_setter) message[2]=CONTROL_I_ONE;
+    else message[2]=CONTROL_I_ZERO; 
+    message[3]=XOR(message[1],message[2]);
+    message[4]=data; //TODO: processar dados antes
+    message[5]=xor_array(sizeof(data)/sizeof(unsigned char),data);
+    message[6]=PACKET_FLAG;
+
+    return 1;
+}
+
+
+int send_message(unsigned char * message){
+
+
+
+    return 1;
 }
 
 int read_answer(int fd) {
@@ -75,7 +97,7 @@ int read_answer(int fd) {
     success = 1;
     int i = 0;
     
-    MessageConstruct ua = { .flag = HANDSHAKE_FLAG, .address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_UA};
+    MessageConstruct ua = { .flag = PACKET_FLAG, .address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_UA};
     enum set_state state = START;
 
     char buf[255] = {0};

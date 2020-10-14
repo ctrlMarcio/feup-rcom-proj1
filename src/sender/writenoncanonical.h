@@ -28,6 +28,14 @@ int open_writing_serial_port(char *port, struct termios *oldtio);
 void define_set_packet(unsigned char *set_packet);
 
 /**
+ * @brief Contructs the message being sent
+ * 
+ * @param message the built message as an array
+ * @return int 1 if success, 0 otherwise
+ */
+int define_message_packet(unsigned char *message, int control_setter, unsigned char* data);
+
+/**
  * @brief Attempts to establish a connections through the port, using a SET message and expecting for an UA one.
  * 
  * @param fd            the fd of the port
@@ -37,6 +45,14 @@ void define_set_packet(unsigned char *set_packet);
  * @return int          1 if successfull, 0 otherwise
  */
 int attempt_handshake(int fd, unsigned char *set_packet, int attempts, int timeout);
+
+/**
+ * @brief Sends the message
+ * 
+ * @param message the built message as an array
+ * @return int 1 if success, 0 otherwise
+ */
+int send_message(unsigned char * message);
 
 /**
  * @brief Terminates the connection to the port.

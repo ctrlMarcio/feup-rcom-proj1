@@ -7,9 +7,9 @@
 #pragma once
 
 /**
- * @brief States the beginning and end of an handshake type of message, i.e. SET and UA messages.
+ * @brief States the beginning and end of a message.
  */
-#define HANDSHAKE_FLAG 0x7e
+#define PACKET_FLAG 0x7e
 
 /**
  * @brief States the address used on a request from the sender or answer from the receiver.
@@ -32,6 +32,19 @@
  * 
  */
 #define CONTROL_UA 0X07
+
+/**
+ * @brief States the control flag for the I message (one).
+ * 
+ */
+#define CONTROL_I_ONE 0X40
+
+
+/**
+ * @brief States the control flag for the I message (zero).
+ * 
+ */
+#define CONTROL_I_ZERO 0X00
 
 typedef struct MessageConstructor {
     char flag;

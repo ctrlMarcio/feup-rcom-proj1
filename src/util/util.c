@@ -12,3 +12,9 @@ int check_arguments(int argc, char **argv) {
 
     return 0;
 }
+
+unsigned char xor_array(int data_size, unsigned char * data){
+    unsigned char result=data[0];
+    for(unsigned int i=1; i<data_size; i++) result=XOR(result,data[i]);
+    return result;
+}

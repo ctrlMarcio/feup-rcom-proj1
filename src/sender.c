@@ -27,7 +27,15 @@ int main(int argc, char **argv) {
     define_set_packet(set_message);
 
     int connected = attempt_handshake(fd, set_message, NR_ATTEMPTS, TIMEOUT);
-    printf("\n\nConnected: %d\n\n", connected);
+    if(connected) printf("Connected\n");
+
+    //actually definir a mensagem
+    unsigned char message[9];
+    unsigned char *data="ola flavia carvalho carvalhido~";
+    define_message_packet(message,1,data);
+
+    //actually mandar a mensagem
+    int sent = send_message(message);
 
     if ((res = terminate_connection(fd, &oldtio)))
         return res;

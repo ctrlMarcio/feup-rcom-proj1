@@ -28,3 +28,6 @@
  * @return int  the error code or 0 if successful
  */
 int check_arguments(int argc, char **argv);
+
+
+unsigned char xor_array(int data_size, unsigned char * data);

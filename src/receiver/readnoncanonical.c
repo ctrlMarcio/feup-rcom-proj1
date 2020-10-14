@@ -60,7 +60,7 @@ void read_set_packet(int fd) {
     unsigned char request_packet[5];
     char buf[255];
 
-    MessageConstruct set = { .flag = HANDSHAKE_FLAG, .address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_SET};
+    MessageConstruct set = { .flag = PACKET_FLAG, .address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_SET};
     enum set_state state = START;
 
     unsigned int i = 0;
@@ -74,11 +74,11 @@ void read_set_packet(int fd) {
 }
 
 void define_ua_packet(unsigned char *ua_packet) {
-    ua_packet[0] = HANDSHAKE_FLAG;
+    ua_packet[0] = PACKET_FLAG;
     ua_packet[1] = ADDRESS_SENDER_RECEIVER;
     ua_packet[2] = CONTROL_UA;
     ua_packet[3] = XOR(ADDRESS_SENDER_RECEIVER, CONTROL_UA);
-    ua_packet[4] = HANDSHAKE_FLAG;
+    ua_packet[4] = PACKET_FLAG;
 }
 
 void send_ua_packet(unsigned char *ua_packet, int fd) {
