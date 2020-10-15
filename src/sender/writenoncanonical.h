@@ -21,11 +21,11 @@
 int open_writing_serial_port(char *port, struct termios *oldtio);
 
 /**
- * @brief Constructs the set packet message.
+ * @brief Constructs the set frame message.
  * 
- * @param set_packet    the built set message as an array, [FLAG, ADDRESS, CONTROL, BCC, FLAG]
+ * @param set_frame    the built set message as an array, [FLAG, ADDRESS, CONTROL, BCC, FLAG]
  */
-void define_set_packet(unsigned char *set_packet);
+void define_set_frame(unsigned char *set_frame);
 
 /**
  * @brief Contructs the message being sent
@@ -33,26 +33,27 @@ void define_set_packet(unsigned char *set_packet);
  * @param message the built message as an array
  * @return int 1 if success, 0 otherwise
  */
-int define_message_packet(unsigned char *message, int control_setter, unsigned char* data);
+int define_message_frame(unsigned char *message, int control_setter, unsigned char* data);
 
 /**
  * @brief Attempts to establish a connections through the port, using a SET message and expecting for an UA one.
  * 
  * @param fd            the fd of the port
- * @param set_packet    the SET message
+ * @param set_frame    the SET message
  * @param attempts      the number of attempts
  * @param timeout       the time, in seconds, between attempts
  * @return int          1 if successfull, 0 otherwise
  */
-int attempt_handshake(int fd, unsigned char *set_packet, int attempts, int timeout);
+int attempt_handshake(int fd, unsigned char *set_frame, int attempts, int timeout);
 
 /**
  * @brief Sends the message
  * 
+ * @param fd        // TODO
  * @param message the built message as an array
- * @return int 1 if success, 0 otherwise
+ * @return int
  */
-int send_message(unsigned char * message);
+int send_message(int fd, unsigned char *message);
 
 /**
  * @brief Terminates the connection to the port.
@@ -62,3 +63,21 @@ int send_message(unsigned char * message);
  * @return int          the error code in case of error, 0 on success
  */
 int terminate_connection(int fd, struct termios *oldtio);
+
+/**
+ * @brief 
+ * 
+ * @param fd
+ * @deprecated 
+ */
+void receive_message(int fd);
+
+/**
+ * @brief 
+ * 
+ * // TODO
+ * 
+ * @param fd 
+ * @param control_setter 
+ */
+void receive_frame(int fd, int control_setter);

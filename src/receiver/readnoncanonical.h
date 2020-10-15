@@ -21,26 +21,33 @@
 int open_reading_serial_port(char *port, struct termios *oldtio);
 
 /**
- * @brief Reads the sent packet sent by the sender.
+ * @brief Reads the sent frame sent by the sender.
  * 
  * @param fd            the fd of the port
  */
-void read_set_packet(int fd);
+void receive_set_frame(int fd);
 
 /**
- * @brief Constructs the UA packet message.
+ * @brief Constructs the UA frame message.
  * 
- * @param set_packet    the built UA message as an array, [FLAG, ADDRESS, CONTROL, BCC, FLAG]
+ * @param set_frame    the built UA message as an array, [FLAG, ADDRESS, CONTROL, BCC, FLAG]
  */
-void define_ua_packet(unsigned char *ua_packet);
+void define_ua_frame(unsigned char *ua_frame);
 
 /**
- * @brief Answers with the UA packet
+ * @brief Answers with the UA frame
  * 
- * @param ua_packet     the UA packet
+ * @param ua_frame     the UA frame
  * @param fd            the port's fd
  */
-void send_ua_packet(unsigned char *ua_packet, int fd);
+void send_ua_frame(unsigned char *ua_frame, int fd);
+
+/**
+ * @brief 
+ * // TODO
+ * @param fd 
+ */
+void receive_frame(int fd, int control_setter);
 
 /**
  * @brief Terminates the connection to the port.

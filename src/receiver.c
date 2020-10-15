@@ -10,16 +10,17 @@ int main(int argc, char **argv) {
     if ((res = check_arguments(argc, argv)))
         return res;
 
-
     struct termios oldtio;
     int fd = open_reading_serial_port(argv[1], &oldtio);
 
-    read_set_packet(fd);
+    receive_set_frame(fd);
 
-    unsigned char ua_packet[5];
-    define_ua_packet(ua_packet);
+    unsigned char ua_frame[5];
+    define_ua_frame(ua_frame);
 
-    send_ua_packet(ua_packet, fd);
+    send_ua_frame(ua_frame, fd);
+
+    receive_frame(fd, 0);
 
     terminate_connection(fd, &oldtio);
 

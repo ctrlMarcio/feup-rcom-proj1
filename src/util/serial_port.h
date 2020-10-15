@@ -6,10 +6,12 @@
 
 #pragma once
 
+#include "util.h"
+
 /**
  * @brief States the beginning and end of a message.
  */
-#define PACKET_FLAG 0x7e
+#define FRAME_FLAG 0x7e
 
 /**
  * @brief States the address used on a request from the sender or answer from the receiver.
@@ -46,8 +48,10 @@
  */
 #define CONTROL_I_ZERO 0X00
 
-typedef struct MessageConstructor {
-    char flag;
+typedef struct MessageConstructor
+{
     char address;
     char control;
+    bool data;
+    int data_received;
 } MessageConstruct;

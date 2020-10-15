@@ -10,6 +10,12 @@
 #define XOR(first, second) (first ^ second)
 
 /**
+ * @brief 
+ * // TODO
+ */
+#define bool int
+
+/**
  * @brief Defines the FALSE boolean.
  */
 #define FALSE 0
@@ -29,5 +35,12 @@
  */
 int check_arguments(int argc, char **argv);
 
-
+/**
+ * @brief 
+ * // TODO
+ * 
+ * @param data_size 
+ * @param data 
+ * @return unsigned char 
+ */
 unsigned char xor_array(int data_size, unsigned char * data);
