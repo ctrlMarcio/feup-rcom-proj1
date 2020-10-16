@@ -27,6 +27,8 @@
  */
 #define TRUE 1
 
+#define ESCAPE 0x7d
+
 /**
  * @brief Checks the arguments of the programs, taking into account that each one receives no more than the port to
  * connect to each other.
@@ -45,4 +47,14 @@ int check_arguments(int argc, char **argv);
  * @param data 
  * @return unsigned char 
  */
-unsigned char xor_array(int data_size, unsigned char * data);
+unsigned char xor_array(int data_size, unsigned char *data);
+
+/**
+ * @brief 
+ * 
+ * @param data 
+ * @param data_size 
+ * @param new_data 
+ * @return int      the size of the new data array
+ */
+int stuff_data(unsigned char *data, int data_size, unsigned char *new_data);

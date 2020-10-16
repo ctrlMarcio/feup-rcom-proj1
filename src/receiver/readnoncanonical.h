@@ -16,12 +16,7 @@
  */
 void answer_establishment(int fd);
 
-/**
- * @brief 
- * // TODO
- * @param fd 
- */
-void receive_information_frame(int fd);
+void answer_information(int fd);
 
 /**
  * @brief Terminates the connection to the port.

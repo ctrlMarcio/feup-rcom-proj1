@@ -2,7 +2,6 @@
 
 #include "util.h"
 
-//TODO : Update state machine to receive data
 void update_state(enum set_state *state, char message, MessageConstruct construct) {
     switch (*state) {
         case START:
@@ -47,7 +46,7 @@ void update_state(enum set_state *state, char message, MessageConstruct construc
             break;
 
         case DATA:
-            if (message == FRAME_FLAG)  // FIXME stuffing
+            if (message == FRAME_FLAG) // FIXME without escape
                 *state = STOP;
             break;
 

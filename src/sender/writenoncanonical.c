@@ -23,7 +23,8 @@ int sequence_number = 0;
 
 void alarm_handler();
 void define_set_frame(unsigned char* set_frame);
-int read_answer(int fd);
+int read_ua_answer(int fd);
+int read_rr_answer(int fd);
 int connect_to_receiver(int fd, unsigned char* set_frame);
 
 int attempt_establishment(int fd) {
@@ -42,10 +43,10 @@ int define_message_frame(unsigned char* message, unsigned char* data, int data_s
         message[2] = CONTROL_I_ZERO;
     message[3] = XOR(message[1], message[2]);
 
-    for (unsigned int i = 0; i < data_size; i++) // FIXME
+    for (unsigned int i = 0; i < data_size; i++)
         message[i + 4] = data[i];
 
-    message[data_size + 4] = xor_array(data_size, data); // FIXME
+    message[data_size + 4] = xor_array(data_size, data);
     message[data_size + 5] = FRAME_FLAG;
 
     return 0;
@@ -66,9 +67,11 @@ int send_information_frame(int fd, unsigned char* message, int frame_size) {
         alarm(TIMEOUT);
         printf("%d bytes sent\n", res);
 
-        success = TRUE; // FIXME
-        // read answer (RR or REJ)
+        read_rr_answer(fd);
     }
+
+    if (success)
+        sequence_number = (sequence_number + 1) % 2;
 
     return !success;
 }
@@ -92,7 +95,7 @@ void define_set_frame(unsigned char* set_frame) {
     set_frame[4] = FRAME_FLAG;
 }
 
-int read_answer(int fd) {
+int read_ua_answer(int fd) {
     unsigned char answer_frame[5];
     success = 1;
     int i = 0;
@@ -119,6 +122,37 @@ int read_answer(int fd) {
     return success;
 }
 
+int read_rr_answer(int fd) {
+    success = 1;
+    int i = 0;
+
+    char control_rr = CONTROL_RR_ONE;
+    if (sequence_number) control_rr = CONTROL_RR_ZERO;
+
+    MessageConstruct rr = { .address = ADDRESS_SENDER_RECEIVER, .control = control_rr, .data = FALSE };
+    enum set_state state = START;
+
+    char buf[1] = { 0 };
+
+    while (success) {
+        int res = read(fd, buf, 1);
+        if (res < 0)
+            continue;
+        update_state(&state, buf[0], rr);
+
+        if (state == FLAG_RCV)
+            i = 0;
+        else if (state == STOP) {
+            success = 1;
+            break;
+        }
+
+        i++;
+    }
+
+    return success;
+}
+
 void alarm_handler() {
     printf("alarm # %d\n", count);
     success = 0;
@@ -138,7 +172,7 @@ int connect_to_receiver(int fd, unsigned char* set_frame) {
         alarm(TIMEOUT);
         printf("%d bytes sent\n", res);
 
-        read_answer(fd);
+        read_ua_answer(fd);
     }
 
     return !success;

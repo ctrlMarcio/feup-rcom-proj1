@@ -5,6 +5,7 @@
 #include "data_link.h"
 #include "sender/writenoncanonical.h"
 #include "util/util.h"
+#include "util/serial_port.h"
 
 int main(int argc, char **argv) {
     int res;
@@ -18,10 +19,12 @@ int main(int argc, char **argv) {
 
     // define the information frame
     int data_size = 32;
-    unsigned char data[32] = "ola flavia carvalho aacarvalhido";
+    unsigned char data[32] = "ola flavia carvalho ~~carvalhido";
     // TODO stuff data and update data size
+    unsigned char new_data[MAX_FRAME_SIZE];
+    data_size = stuff_data(data, data_size, new_data);
     unsigned char message[data_size + 6];
-    define_message_frame(message, data, data_size);
+    define_message_frame(message, new_data, data_size);
 
     // send the information frame
     int sent_message_error = send_information_frame(fd, message, data_size + 6);

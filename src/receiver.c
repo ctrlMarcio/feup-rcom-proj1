@@ -15,9 +15,9 @@ int main(int argc, char** argv) {
 
     // IMPLEMENTED UNTIL HERE WITH ASSIGNMENT CALLS !!!!!!!
 
-    receive_information_frame(fd);
+    answer_information(fd);
 
-    struct termios oldtio;
+    struct termios oldtio; // TODO
     terminate_receiver_connection(fd, &oldtio);
 
     return 0;
