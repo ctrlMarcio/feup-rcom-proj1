@@ -6,18 +6,19 @@
 #include "util/util.h"
 #include "receiver/readnoncanonical.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     int res;
     if ((res = check_arguments(argc, argv)))
         return res;
 
-    llopen(argv[1], FALSE);
+    int fd = llopen(argv[1], FALSE);
 
-    // FIXME IMPLEMENTED UNTIL HERE WITH ASSIGNMENT CALLS !!!!!!!
+    // IMPLEMENTED UNTIL HERE WITH ASSIGNMENT CALLS !!!!!!!
 
-    // receive_frame(fd, 0);
+    receive_information_frame(fd);
 
-    // terminate_connection(fd, &oldtio);
+    struct termios oldtio;
+    terminate_receiver_connection(fd, &oldtio);
 
     return 0;
 }

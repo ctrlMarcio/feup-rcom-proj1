@@ -31,9 +31,9 @@ int attempt_establishment(int fd);
  * @brief Contructs the message being sent
  * 
  * @param message the built message as an array
- * @return int 1 if success, 0 otherwise
+ * @return int 0 if success, 1 otherwise
  */
-int define_message_frame(unsigned char *message, int control_setter, unsigned char* data);
+int define_message_frame(unsigned char *message, unsigned char* data, int data_size);
 
 /**
  * @brief Sends the message
@@ -42,7 +42,7 @@ int define_message_frame(unsigned char *message, int control_setter, unsigned ch
  * @param message the built message as an array
  * @return int
  */
-int send_message(int fd, unsigned char *message);
+int send_information_frame(int fd, unsigned char *message, int frame_size);
 
 /**
  * @brief Terminates the connection to the port.
@@ -52,21 +52,3 @@ int send_message(int fd, unsigned char *message);
  * @return int          the error code in case of error, 0 on success
  */
 int terminate_sender_connection(int fd, struct termios *oldtio);
-
-/**
- * @brief 
- * 
- * @param fd
- * @deprecated 
- */
-void receive_message(int fd);
-
-/**
- * @brief 
- * 
- * // TODO
- * 
- * @param fd 
- * @param control_setter 
- */
-void receive_frame(int fd, int control_setter);

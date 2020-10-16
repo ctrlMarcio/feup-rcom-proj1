@@ -41,21 +41,14 @@ void update_state(enum set_state *state, char message, MessageConstruct construc
                     *state = STOP;
                 else
                     *state = START;
-            } else {  // FIXME
+            } else {
                 *state = DATA;
             }
             break;
 
         case DATA:
-            if (construct.data_received == 249)  // FIXME and XOR all over
-                *state = BCC2_OK;
-            break;
-
-        case BCC2_OK:
-            if (message == FRAME_FLAG)
+            if (message == FRAME_FLAG)  // FIXME stuffing
                 *state = STOP;
-            else
-                *state = START;
             break;
 
         default:

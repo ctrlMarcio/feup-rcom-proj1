@@ -14,17 +14,20 @@ int main(int argc, char **argv) {
     int fd = llopen(argv[1], TRUE);
     if (fd > 0) printf("Connected\n");
 
-    // FIXME IMPLEMENTED UNTIL HERE WITH ASSIGNMENT CALLS !!!!!!!
+    // IMPLEMENTED UNTIL HERE WITH ASSIGNMENT CALLS !!!!!!!
 
-    // // define the information frame
-    // unsigned char message[255]; // FIXME
-    // unsigned char data[33] = "ola flavia carvalho ~~carvalhido";
-    // define_message_frame(message, 0, data);
+    // define the information frame
+    int data_size = 32;
+    unsigned char data[32] = "ola flavia carvalho aacarvalhido";
+    // TODO stuff data and update data size
+    unsigned char message[data_size + 6];
+    define_message_frame(message, data, data_size);
 
-    // // send the information frame
-    // int sent_message_error = send_message(fd, message);
-    // printf("Sent error: %d\n", sent_message_error);
+    // send the information frame
+    int sent_message_error = send_information_frame(fd, message, data_size + 6);
+    printf("Sent error: %d\n", sent_message_error);
 
-    // if ((res = terminate_connection(fd, &oldtio)))
-    //     return res;
+    struct termios oldtio;
+    if ((res = terminate_sender_connection(fd, &oldtio)))
+        return res;
 }

@@ -21,7 +21,7 @@ void answer_establishment(int fd);
  * // TODO
  * @param fd 
  */
-void receive_frame(int fd, int control_setter);
+void receive_information_frame(int fd);
 
 /**
  * @brief Terminates the connection to the port.

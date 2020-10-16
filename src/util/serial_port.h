@@ -48,10 +48,11 @@
  */
 #define CONTROL_I_ZERO 0X00
 
+#define MAX_FRAME_SIZE 102400 // 100 KByte
+
 typedef struct MessageConstructor
 {
     char address;
     char control;
     bool data;
-    int data_received;
 } MessageConstruct;
