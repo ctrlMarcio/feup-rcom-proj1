@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#include "data_link.h"
 #include "util/util.h"
 #include "receiver/readnoncanonical.h"
 
@@ -10,19 +11,13 @@ int main(int argc, char **argv) {
     if ((res = check_arguments(argc, argv)))
         return res;
 
-    struct termios oldtio;
-    int fd = open_reading_serial_port(argv[1], &oldtio);
+    llopen(argv[1], FALSE);
 
-    receive_set_frame(fd);
+    // FIXME IMPLEMENTED UNTIL HERE WITH ASSIGNMENT CALLS !!!!!!!
 
-    unsigned char ua_frame[5];
-    define_ua_frame(ua_frame);
+    // receive_frame(fd, 0);
 
-    send_ua_frame(ua_frame, fd);
-
-    receive_frame(fd, 0);
-
-    terminate_connection(fd, &oldtio);
+    // terminate_connection(fd, &oldtio);
 
     return 0;
 }

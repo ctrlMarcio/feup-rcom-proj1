@@ -4,6 +4,8 @@
  * @date    2020-10-13
  */
 
+#pragma once
+
 #include "serial_port.h"
 
 enum set_state{START, FLAG_RCV, A_RCV, C_RCV, BCC_OK, DATA, BCC2_OK, STOP};

@@ -18,43 +18,18 @@
 
 #define BAUDRATE B38400
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
-#define FALSE 0
-#define TRUE 1
 
-int open_reading_serial_port(char *port, struct termios *oldtio) {
-    struct termios newtio;
+void receive_set_frame(int fd);
+void define_ua_frame(unsigned char *ua_frame);
+void send_ua_frame(unsigned char *ua_frame, int fd);
 
-    int fd = open(port, O_RDWR | O_NOCTTY);
-    if (fd < 0) {
-        perror(port);
-        exit(CONFIG_PORT_ERROR);
-    }
+void answer_establishment(int fd) {
+    receive_set_frame(fd);
 
-    if (tcgetattr(fd, oldtio) == -1) { /* save current port settings */
-        perror("tcgetattr");
-        exit(CONFIG_PORT_ERROR);
-    }
+    unsigned char ua_frame[5];
+    define_ua_frame(ua_frame);
 
-    bzero(&newtio, sizeof(newtio));
-    newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
-    newtio.c_iflag = IGNPAR;
-    newtio.c_oflag = 0;
-
-    /* set input mode (non-canonical, no echo,...) */
-    newtio.c_lflag = 0;
-
-    newtio.c_cc[VTIME] = 0; /* inter-character timer unused */
-    newtio.c_cc[VMIN] = 1;  /* blocking read until 5 chars received */
-
-    tcflush(fd, TCIOFLUSH);
-
-    if (tcsetattr(fd, TCSANOW, &newtio) == -1) {
-        perror("tcsetattr");
-        exit(CONFIG_PORT_ERROR);
-    }
-
-    printf("New termios structure set\n");
-    return fd;
+    send_ua_frame(ua_frame, fd);
 }
 
 void receive_set_frame(int fd) {
@@ -66,7 +41,10 @@ void receive_set_frame(int fd) {
 
     unsigned int i = 0;
     while (state != STOP) {
-        read(fd, buf, 1);
+        int res = read(fd, buf, 1);
+        if (res < 0)
+            continue;
+            
         request_frame[i] = buf[0];
         update_state(&state, request_frame[i], set);
         i++;
@@ -86,7 +64,7 @@ void send_ua_frame(unsigned char *ua_frame, int fd) {
     printf("%d bytes sent\n", res);
 }
 
-void terminate_connection(int fd, struct termios *oldtio) {
+void terminate_receiver_connection(int fd, struct termios *oldtio) {
     tcsetattr(fd, TCSANOW, oldtio);
     close(fd);
 }

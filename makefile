@@ -13,8 +13,8 @@ RECEIVER_EXECUTABLE = receiver
 COMPILATION_EXTENSIONS = -Wall -o
 
 # The names of the .c source files
-SENDER_SRC = ${SRC_DIR}/sender.c ${SRC_DIR}/sender/writenoncanonical.c ${SRC_DIR}/util/util.c ${SRC_DIR}/util/state_machine.c
-RECEIVER_SRC = ${SRC_DIR}/receiver.c ${SRC_DIR}/receiver/readnoncanonical.c ${SRC_DIR}/util/util.c ${SRC_DIR}/util/state_machine.c
+SENDER_SRC = ${SRC_DIR}/sender.c ${SRC_DIR}/data_link.c ${SRC_DIR}/sender/writenoncanonical.c ${SRC_DIR}/receiver/readnoncanonical.c ${SRC_DIR}/util/util.c ${SRC_DIR}/util/state_machine.c
+RECEIVER_SRC = ${SRC_DIR}/receiver.c ${SRC_DIR}/data_link.c ${SRC_DIR}/sender/writenoncanonical.c ${SRC_DIR}/receiver/readnoncanonical.c ${SRC_DIR}/util/util.c ${SRC_DIR}/util/state_machine.c
 SRC_FILES = ${SENDER_SRC} ${RECEIVER_SRC}
 
 make: ${SRC_FILES}

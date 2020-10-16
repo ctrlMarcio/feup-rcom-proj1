@@ -4,6 +4,8 @@
  * @date    2020-10-11
  */
 
+#pragma once
+
 /**
  * @brief Calculates a bitwise XOR between two numbers.
  */
