@@ -18,6 +18,5 @@
 
 /**
  * @brief 
- * // TODO
  */
 #define ESTABLISHMENT_ERROR -3

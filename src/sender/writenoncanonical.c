@@ -24,7 +24,7 @@ int sequence_number = 0;
 void alarm_handler();
 void define_set_frame(unsigned char* set_frame);
 int read_ua_answer(int fd);
-int read_rr_answer(int fd);
+int read_receiver_answer(int fd);
 int connect_to_receiver(int fd, unsigned char* set_frame);
 
 int attempt_establishment(int fd) {
@@ -65,13 +65,13 @@ int send_information_frame(int fd, unsigned char* message, int frame_size) {
         // sends the frame
         int res = write(fd, message, sizeof(unsigned char) * frame_size);
         alarm(TIMEOUT);
-        printf("%d bytes sent\n", res);
+        printf("%d bytes sent in an I frame\n", res);
 
-        read_rr_answer(fd);
+        read_receiver_answer(fd);
     }
 
     if (success)
-        sequence_number = (sequence_number + 1) % 2;
+        sequence_number = 1 - sequence_number;
 
     return !success;
 }
@@ -101,7 +101,7 @@ int read_ua_answer(int fd) {
     int i = 0;
 
     MessageConstruct ua = { .address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_UA, .data = FALSE };
-    enum set_state state = START;
+    enum set_state rr_state = START;
 
     char buf[255] = { 0 };
 
@@ -110,9 +110,9 @@ int read_ua_answer(int fd) {
         if (res < 0)
             continue;
         answer_frame[i] = buf[0];
-        update_state(&state, answer_frame[i], ua);
+        update_state(&rr_state, answer_frame[i], ua);
 
-        if (state == STOP) {
+        if (rr_state == STOP) {
             success = 1;
             break;
         }
@@ -122,7 +122,7 @@ int read_ua_answer(int fd) {
     return success;
 }
 
-int read_rr_answer(int fd) {
+int read_receiver_answer(int fd) {
     success = 1;
     int i = 0;
 
@@ -130,7 +130,13 @@ int read_rr_answer(int fd) {
     if (sequence_number) control_rr = CONTROL_RR_ZERO;
 
     MessageConstruct rr = { .address = ADDRESS_SENDER_RECEIVER, .control = control_rr, .data = FALSE };
-    enum set_state state = START;
+    enum set_state rr_state = START;
+
+    char control_rej = CONTROL_REJ_ONE;
+    if (sequence_number) control_rej = CONTROL_REJ_ZERO;
+
+    MessageConstruct rej = { .address = ADDRESS_RECEIVER_SENDER, .control = control_rej, .data = FALSE};
+    enum set_state rej_state = START;
 
     char buf[1] = { 0 };
 
@@ -138,12 +144,17 @@ int read_rr_answer(int fd) {
         int res = read(fd, buf, 1);
         if (res < 0)
             continue;
-        update_state(&state, buf[0], rr);
+        update_state(&rr_state, buf[0], rr);
+        update_state(&rej_state, buf[0], rej);
 
-        if (state == FLAG_RCV)
+        if (rr_state == FLAG_RCV && rej_state == FLAG_RCV)
             i = 0;
-        else if (state == STOP) {
+        else if (rr_state == STOP) {
             success = 1;
+            break;
+        } else if (rej_state == STOP) { // if it reads a REJ frame, returns unsuccess
+            alarm(0); // anticipates alarm
+            alarm_handler();
             break;
         }
 
@@ -154,9 +165,8 @@ int read_rr_answer(int fd) {
 }
 
 void alarm_handler() {
-    printf("alarm # %d\n", count);
+    printf("alarm # %d\n", ++count);
     success = 0;
-    count++;
 }
 
 int connect_to_receiver(int fd, unsigned char* set_frame) {
@@ -170,7 +180,7 @@ int connect_to_receiver(int fd, unsigned char* set_frame) {
         // sends the set
         int res = write(fd, set_frame, sizeof(unsigned char) * 5);
         alarm(TIMEOUT);
-        printf("%d bytes sent\n", res);
+        printf("%d bytes sent in a SET frame\n", res);
 
         read_ua_answer(fd);
     }

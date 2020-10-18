@@ -11,7 +11,7 @@
 
 /**
  * @brief 
- * // TODO
+ *
  * @param fd 
  */
 void answer_establishment(int fd);

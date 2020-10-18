@@ -20,7 +20,6 @@ int main(int argc, char **argv) {
     // define the information frame
     int data_size = 32;
     unsigned char data[32] = "ola flavia carvalho ~~carvalhido";
-    // TODO stuff data and update data size
     unsigned char new_data[MAX_FRAME_SIZE];
     data_size = stuff_data(data, data_size, new_data);
     unsigned char message[data_size + 6];

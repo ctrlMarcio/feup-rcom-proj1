@@ -21,7 +21,7 @@
 
 /**
  * @brief 
- * // TODO
+ *
  * @param fd 
  * @return int 
  */
@@ -38,7 +38,6 @@ int define_message_frame(unsigned char *message, unsigned char* data, int data_s
 /**
  * @brief Sends the message
  * 
- * @param fd        // TODO
  * @param message the built message as an array
  * @return int
  */

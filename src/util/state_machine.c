@@ -46,7 +46,7 @@ void update_state(enum set_state *state, char message, MessageConstruct construc
             break;
 
         case DATA:
-            if (message == FRAME_FLAG) // FIXME without escape
+            if (message == FRAME_FLAG)
                 *state = STOP;
             break;
 

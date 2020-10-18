@@ -50,6 +50,10 @@
 
 #define CONTROL_RR_ZERO 0x05
 
+#define CONTROL_REJ_ONE 0x81
+
+#define CONTROL_REJ_ZERO 0x01
+
 #define MAX_FRAME_SIZE 102400 // 100 KByte
 
 typedef struct MessageConstructor

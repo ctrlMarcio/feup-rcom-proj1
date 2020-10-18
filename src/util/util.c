@@ -21,6 +21,15 @@ unsigned char xor_array(int data_size, unsigned char* data) {
     return result;
 }
 
+void resize_array(unsigned char *array, unsigned size, unsigned char *res, unsigned first_index, unsigned res_size) {
+    if (first_index < 0 || first_index >= size || (first_index + res_size) > size)
+        res = array;
+
+    int i = 0;
+    for(; i < res_size; ++i)
+        res[i] = array[first_index + i];
+}
+
 int stuff_data(unsigned char *data, int data_size, unsigned char *new_data) {
     int j = 0;
     for (int i = 0; i < data_size; ++i) {

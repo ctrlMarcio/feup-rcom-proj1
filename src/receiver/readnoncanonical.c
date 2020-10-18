@@ -27,6 +27,8 @@ void send_ua_frame(unsigned char* ua_frame, int fd);
 void receive_information_frame(int fd);
 void define_rr_frame(unsigned char* rr_frame);
 void send_rr_frame(unsigned char* rr_frame, int fd);
+void send_rej_frame(int fd);
+void define_rej_frame(unsigned char* rej_frame);
 
 void answer_establishment(int fd) {
     receive_set_frame(fd);
@@ -44,8 +46,17 @@ void answer_information(int fd) {
     define_rr_frame(rr_frame);
 
     send_rr_frame(rr_frame, fd);
-    answer_sequence_number = (answer_sequence_number + 1) % 2;
+    answer_sequence_number = 1 - answer_sequence_number; // alternate between 0 and 1
 }
+
+void terminate_receiver_connection(int fd, struct termios* oldtio) {
+    tcsetattr(fd, TCSANOW, oldtio);
+    close(fd);
+}
+
+/*******************************************************
+ *                  PRIVATE FUNCTIONS                  *
+********************************************************/
 
 void receive_set_frame(int fd) {
     unsigned char request_frame[5];
@@ -76,17 +87,12 @@ void define_ua_frame(unsigned char* ua_frame) {
 
 void send_ua_frame(unsigned char* ua_frame, int fd) {
     int res = write(fd, ua_frame, sizeof(unsigned char) * 5);
-    printf("%d bytes sent\n", res);
+    printf("%d bytes sent in an UA frame\n", res);
 }
 
 void send_rr_frame(unsigned char* rr_frame, int fd) {
     int res = write(fd, rr_frame, sizeof(unsigned char) * 5);
-    printf("%d bytes sent\n", res);
-}
-
-void terminate_receiver_connection(int fd, struct termios* oldtio) {
-    tcsetattr(fd, TCSANOW, oldtio);
-    close(fd);
+    printf("%d bytes sent in a RR frame\n", res);
 }
 
 void receive_information_frame(int fd) {
@@ -109,12 +115,12 @@ void receive_information_frame(int fd) {
     while (state != STOP) {
         read(fd, buf, 1);
 
-        if (buf[0] == ESCAPE) { // TODO improve destuff
+        if (buf[0] == ESCAPE) {
             read(fd, buf, 1);
 
             information_frame[i] = buf[0];
 
-            printf("%c\n", information_frame[i]);  // TEST
+            // printf("%c\n", information_frame[i]);  // TEST
             i++;
             continue;
         }
@@ -124,16 +130,39 @@ void receive_information_frame(int fd) {
         if (state == FLAG_RCV)
             i = 0;
         else if (state == STOP) {
-            // TODO destuff
-            // TODO check information_frame[i - 1] XOR
-            // TODO send REJ if wrong
+            // TODO this is ugly, save the data array and test in smaller functions :)
+            int data_size = i - 5; // i + 1 is the frame size i + 1 - 6, minus the non data flags
+            unsigned char data_array[data_size];
+            resize_array(information_frame, i, data_array, 4, data_size);
+            unsigned char bcc2_result = xor_array(data_size, data_array);
+            if (bcc2_result != information_frame[i - 1]) {
+                send_rej_frame(fd);
+                return receive_information_frame(fd); // TODO temporary, let llread or something handle this
+            }
         }
 
         information_frame[i] = buf[0];
 
-        printf("%c\n", information_frame[i]);  // TEST
+        // printf("%c\n", information_frame[i]);  // TEST
         i++;
     }
+}
+
+void send_rej_frame(int fd) {
+    unsigned char rej_frame[5];
+    define_rej_frame(rej_frame);
+
+    int res = write(fd, rej_frame, sizeof(unsigned char) * 5);
+    printf("%d bytes sent in a REJ frame\n", res);
+}
+
+void define_rej_frame(unsigned char* rej_frame) {
+    rej_frame[0] = FRAME_FLAG;
+    rej_frame[1] = ADDRESS_RECEIVER_SENDER;
+    rej_frame[2] = CONTROL_REJ_ZERO;
+    if (answer_sequence_number) rej_frame[2] = CONTROL_REJ_ONE;
+    rej_frame[3] = XOR(rej_frame[1], rej_frame[2]);
+    rej_frame[4] = FRAME_FLAG;
 }
 
 void define_rr_frame(unsigned char* rr_frame) {

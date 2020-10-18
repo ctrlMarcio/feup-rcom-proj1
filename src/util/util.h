@@ -13,7 +13,6 @@
 
 /**
  * @brief 
- * // TODO
  */
 #define bool int
 
@@ -41,13 +40,15 @@ int check_arguments(int argc, char **argv);
 
 /**
  * @brief 
- * // TODO
  * 
  * @param data_size 
  * @param data 
  * @return unsigned char 
  */
 unsigned char xor_array(int data_size, unsigned char *data);
+
+// returns the same array if there's an error
+void resize_array(unsigned char *array, unsigned size, unsigned char *res, unsigned first_index, unsigned res_size);
 
 /**
  * @brief 
