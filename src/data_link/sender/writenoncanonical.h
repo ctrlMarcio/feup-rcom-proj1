@@ -33,7 +33,7 @@ int attempt_establishment(int fd);
  * @param message the built message as an array
  * @return int 0 if success, 1 otherwise
  */
-int define_message_frame(unsigned char *message, unsigned char* data, int data_size);
+int define_message_frame(unsigned char *message, unsigned char *data, int data_size);
 
 /**
  * @brief Sends the message

@@ -22,8 +22,6 @@
 int answer_sequence_number = 1;
 
 void receive_set_frame(int fd);
-void define_ua_frame(unsigned char* ua_frame);
-void send_ua_frame(unsigned char* ua_frame, int fd);
 void receive_information_frame(int fd);
 void define_rr_frame(unsigned char* rr_frame);
 void send_rr_frame(unsigned char* rr_frame, int fd);
@@ -75,19 +73,6 @@ void receive_set_frame(int fd) {
         update_state(&state, request_frame[i], set);
         i++;
     }
-}
-
-void define_ua_frame(unsigned char* ua_frame) {
-    ua_frame[0] = FRAME_FLAG;
-    ua_frame[1] = ADDRESS_SENDER_RECEIVER;
-    ua_frame[2] = CONTROL_UA;
-    ua_frame[3] = XOR(ADDRESS_SENDER_RECEIVER, CONTROL_UA);
-    ua_frame[4] = FRAME_FLAG;
-}
-
-void send_ua_frame(unsigned char* ua_frame, int fd) {
-    int res = write(fd, ua_frame, sizeof(unsigned char) * 5);
-    printf("%d bytes sent in an UA frame\n", res);
 }
 
 void send_rr_frame(unsigned char* rr_frame, int fd) {

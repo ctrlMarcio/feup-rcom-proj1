@@ -14,3 +14,11 @@
  * @return int 
  */
 int llopen(char *port, bool sender);
+
+/**
+ * @brief 
+ * 
+ * @param fd 
+ * @return int 
+ */
+int llclose(int fd, bool sender);

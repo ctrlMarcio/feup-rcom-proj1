@@ -54,6 +54,8 @@
 
 #define CONTROL_REJ_ZERO 0x01
 
+#define CONTROL_DISC 0x0b
+
 #define MAX_FRAME_SIZE 102400 // 100 KByte
 
 typedef struct MessageConstructor

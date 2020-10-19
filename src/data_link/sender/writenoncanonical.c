@@ -76,6 +76,27 @@ int send_information_frame(int fd, unsigned char* message, int frame_size) {
     return !success;
 }
 
+int send_disc_frame(int fd, unsigned char *disc_frame){
+    (void)signal(SIGALRM, alarm_handler);
+
+    count = 0, success = 0;
+
+    // receives the answer_frame
+    while (count < NR_ATTEMPTS) {
+        if (success)
+            break;
+
+        // sends the disc
+        int res = write(fd, disc_frame, sizeof(unsigned char) * 5);
+        alarm(TIMEOUT);
+        printf("%d bytes sent in a DISC frame\n", res);
+
+        read_ua_answer(fd);
+    }
+
+    return !success;
+}
+
 int terminate_sender_connection(int fd, struct termios* oldtio) {
     sleep(1);
     if (tcsetattr(fd, TCSANOW, oldtio) == -1) {
@@ -100,10 +121,10 @@ int read_ua_answer(int fd) {
     success = 1;
     int i = 0;
 
-    MessageConstruct ua = { .address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_UA, .data = FALSE };
+    MessageConstruct ua = {.address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_UA, .data = FALSE};
     enum set_state rr_state = START;
 
-    char buf[255] = { 0 };
+    char buf[255] = {0};
 
     while (success) {
         int res = read(fd, buf, 1);
@@ -129,16 +150,16 @@ int read_receiver_answer(int fd) {
     char control_rr = CONTROL_RR_ONE;
     if (sequence_number) control_rr = CONTROL_RR_ZERO;
 
-    MessageConstruct rr = { .address = ADDRESS_SENDER_RECEIVER, .control = control_rr, .data = FALSE };
+    MessageConstruct rr = {.address = ADDRESS_SENDER_RECEIVER, .control = control_rr, .data = FALSE};
     enum set_state rr_state = START;
 
     char control_rej = CONTROL_REJ_ONE;
     if (sequence_number) control_rej = CONTROL_REJ_ZERO;
 
-    MessageConstruct rej = { .address = ADDRESS_RECEIVER_SENDER, .control = control_rej, .data = FALSE};
+    MessageConstruct rej = {.address = ADDRESS_RECEIVER_SENDER, .control = control_rej, .data = FALSE};
     enum set_state rej_state = START;
 
-    char buf[1] = { 0 };
+    char buf[1] = {0};
 
     while (success) {
         int res = read(fd, buf, 1);
@@ -152,8 +173,8 @@ int read_receiver_answer(int fd) {
         else if (rr_state == STOP) {
             success = 1;
             break;
-        } else if (rej_state == STOP) { // if it reads a REJ frame, returns unsuccess
-            alarm(0); // anticipates alarm
+        } else if (rej_state == STOP) {  // if it reads a REJ frame, returns unsuccess
+            alarm(0);                    // anticipates alarm
             alarm_handler();
             break;
         }

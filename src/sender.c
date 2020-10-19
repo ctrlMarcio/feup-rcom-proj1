@@ -29,6 +29,18 @@ int main(int argc, char **argv) {
     int sent_message_error = send_information_frame(fd, message, data_size + 6);
     printf("Sent error: %d\n", sent_message_error);
 
+    llclose(fd,1);
+
+    unsigned char disc_frame[5];
+    define_disc_frame(disc_frame);
+
+    if ((sent_message_error = send_disc_frame(fd, disc_frame)))
+        printf("Sent error: %d\n", sent_message_error);
+
+    receive_disc_frame(fd);
+
+    send_ua_frame();
+
     struct termios oldtio;
     if ((res = terminate_sender_connection(fd, &oldtio)))
         return res;
