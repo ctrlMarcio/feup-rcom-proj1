@@ -2,10 +2,10 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "data_link.h"
-#include "sender/writenoncanonical.h"
+#include "data_link/data_link.h"
+#include "data_link/sender/writenoncanonical.h"
+#include "data_link/util/serial_port.h"
 #include "util/util.h"
-#include "util/serial_port.h"
 
 int main(int argc, char **argv) {
     int res;
@@ -13,7 +13,6 @@ int main(int argc, char **argv) {
         return res;
 
     int fd = llopen(argv[1], TRUE);
-    if (fd > 0) printf("Connected\n");
 
     // IMPLEMENTED UNTIL HERE WITH ASSIGNMENT CALLS !!!!!!!
 
@@ -26,22 +25,7 @@ int main(int argc, char **argv) {
     define_message_frame(message, new_data, data_size);
 
     // send the information frame
-    int sent_message_error = send_information_frame(fd, message, data_size + 6);
-    printf("Sent error: %d\n", sent_message_error);
+    send_retransmission_frame(fd, message, data_size + 6, "I", RR, TRUE, 0);
 
-    llclose(fd,1);
-
-    unsigned char disc_frame[5];
-    define_disc_frame(disc_frame);
-
-    if ((sent_message_error = send_disc_frame(fd, disc_frame)))
-        printf("Sent error: %d\n", sent_message_error);
-
-    receive_disc_frame(fd);
-
-    send_ua_frame();
-
-    struct termios oldtio;
-    if ((res = terminate_sender_connection(fd, &oldtio)))
-        return res;
+    return llclose(fd,TRUE);
 }

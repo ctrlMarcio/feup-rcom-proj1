@@ -9,7 +9,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "error/error.h"
+#include "../error/error.h"
 #include "receiver/readnoncanonical.h"
 #include "sender/writenoncanonical.h"
 #include "util/serial_port.h"
@@ -20,12 +20,10 @@
 struct termios oldtio;
 
 int open_serial_port(char* port);
-int attempt_interruption(int fd);
-void define_disc_frame(unsigned char* disc_frame);
-void receive_disc_frame(int fd, bool sender);
-void define_ua_frame(unsigned char* ua_frame);
-void send_ua_frame(unsigned char* ua_frame, int fd);
+void define_disc_frame(unsigned char* disc_frame, bool sender_to_receiver);
 int close_sender(int fd);
+int close_receiver(int fd);
+void receive_disc_frame(int fd, bool sender);
 
 int llopen(char* port, bool sender) {
     int fd = open_serial_port(port);
@@ -35,7 +33,8 @@ int llopen(char* port, bool sender) {
     if (sender) {
         if (attempt_establishment(fd))
             return ESTABLISHMENT_ERROR;
-    } else {
+    }
+    else {
         answer_establishment(fd);
     }
 
@@ -81,42 +80,42 @@ int open_serial_port(char* port) {
 int llclose(int fd, bool sender) {
     if (sender)
         return close_sender(fd);
-    else 
-        
-        // TODO receive disc
-
-        // TODO send dsic
-
-        // terminate connection
+    else
+        return close_receiver(fd);
 }
 
 int close_sender(int fd) {
-    int interruption = attempt_interruption(fd);
-    if (interruption)
-        printf("coiso\n");  // TODO error
+    unsigned char disc_frame[5];
+    define_disc_frame(disc_frame, TRUE);
 
-    receive_disc_frame(fd, TRUE);
+    send_retransmission_frame(fd, disc_frame, 5, "DISC", DISC, TRUE, 0);
 
     unsigned char ua_frame[5];
-    define_ua_frame(ua_frame);
+    define_ua_frame(ua_frame, FALSE);
 
-    send_ua_frame(ua_frame, fd);
+    send_unanswered_frame(fd, ua_frame, 5, "UA");
 
-    // TODO terminate connection
-
-    return 0;
+    return terminate_sender_connection(fd, &oldtio);
 }
 
-int attempt_interruption(int fd) {
+int close_receiver(int fd) {
+    receive_frame(fd, 5, DISC, TRUE, 0, FALSE); // TODO sequence number not required
+
     unsigned char disc_frame[5];
-    define_disc_frame(disc_frame);
+    define_disc_frame(disc_frame, FALSE);
 
-    return send_disc_frame(fd, disc_frame);
+    if (send_retransmission_frame(fd, disc_frame, 5, "DISC", UA, FALSE, 1)) // TODO sequence number not required
+        printf("coiso\n");  // TODO error
+
+    return terminate_sender_connection(fd, &oldtio);
 }
 
-void define_disc_frame(unsigned char* disc_frame) {
+void define_disc_frame(unsigned char* disc_frame, bool sender_to_receiver) {
     disc_frame[0] = FRAME_FLAG;
-    disc_frame[1] = ADDRESS_SENDER_RECEIVER;
+    if (sender_to_receiver)
+        disc_frame[1] = ADDRESS_SENDER_RECEIVER;
+    else
+        disc_frame[1] = ADDRESS_RECEIVER_SENDER;
     disc_frame[2] = CONTROL_DISC;
     disc_frame[3] = XOR(disc_frame[1], disc_frame[2]);
     disc_frame[4] = FRAME_FLAG;
@@ -128,11 +127,11 @@ void receive_disc_frame(int fd, bool sender) {
 
     unsigned char address;
     if (sender)
-        address = ADDRESS_SENDER_RECEIVER;
-    else
         address = ADDRESS_RECEIVER_SENDER;
+    else
+        address = ADDRESS_SENDER_RECEIVER;
 
-    MessageConstruct disc = {.address = address, .control = CONTROL_DISC, .data = FALSE};
+    MessageConstruct disc = { .address = address, .control = CONTROL_DISC, .data = FALSE };
 
     enum set_state state = START;
 
@@ -146,19 +145,6 @@ void receive_disc_frame(int fd, bool sender) {
         update_state(&state, disc_frame[i], disc);
         i++;
     }
-
-    // 🥰🧡💛💚💙💜🤎🖤🤍💕💞💓💗💖💘💝 :(((
 }
 
-void define_ua_frame(unsigned char* ua_frame) {
-    ua_frame[0] = FRAME_FLAG;
-    ua_frame[1] = ADDRESS_SENDER_RECEIVER;
-    ua_frame[2] = CONTROL_UA;
-    ua_frame[3] = XOR(ADDRESS_SENDER_RECEIVER, CONTROL_UA);
-    ua_frame[4] = FRAME_FLAG;
-}
-
-void send_ua_frame(unsigned char* ua_frame, int fd) {
-    int res = write(fd, ua_frame, sizeof(unsigned char) * 5);
-    printf("%d bytes sent in an UA frame\n", res);
-}
+/* 🥰🧡💛💚💙💜🤎🖤🤍💕💞💓💗💖💘💝 :((( */

@@ -1,6 +1,6 @@
 #include "state_machine.h"
 
-#include "util.h"
+#include "../../util/util.h"
 
 void update_state(enum set_state *state, char message, MessageConstruct construct) {
     switch (*state) {

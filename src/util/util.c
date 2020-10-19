@@ -3,10 +3,11 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "serial_port.h"
+#include "../data_link/util/serial_port.h"
 #include "../error/error.h"
 
 int check_arguments(int argc, char** argv) {
+    // TODO accept ttys0 ttys1
     if ((argc < 2) || ((strcmp("/dev/ttyS10", argv[1]) != 0) && (strcmp("/dev/ttyS11", argv[1]) != 0))) {
         printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
         return ARGS_ERROR;

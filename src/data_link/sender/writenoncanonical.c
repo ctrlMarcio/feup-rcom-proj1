@@ -9,10 +9,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "../error/error.h"
+#include "../../error/error.h"
+#include "../../util/util.h"
 #include "../util/serial_port.h"
 #include "../util/state_machine.h"
-#include "../util/util.h"
 
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
@@ -21,7 +21,6 @@
 int count = 0, success = 0;
 int sequence_number = 0;
 
-void alarm_handler();
 void define_set_frame(unsigned char* set_frame);
 int read_ua_answer(int fd);
 int read_receiver_answer(int fd);
@@ -31,7 +30,7 @@ int attempt_establishment(int fd) {
     unsigned char set_frame[5];
     define_set_frame(set_frame);
 
-    return connect_to_receiver(fd, set_frame);
+    return send_retransmission_frame(fd, set_frame, 5, "SET", UA, TRUE, 0); // TODO dont need for sequence number
 }
 
 int define_message_frame(unsigned char* message, unsigned char* data, int data_size) {
@@ -76,7 +75,7 @@ int send_information_frame(int fd, unsigned char* message, int frame_size) {
     return !success;
 }
 
-int send_disc_frame(int fd, unsigned char *disc_frame){
+int send_disc_frame(int fd, unsigned char *disc_frame) {
     (void)signal(SIGALRM, alarm_handler);
 
     count = 0, success = 0;
@@ -91,7 +90,8 @@ int send_disc_frame(int fd, unsigned char *disc_frame){
         alarm(TIMEOUT);
         printf("%d bytes sent in a DISC frame\n", res);
 
-        read_ua_answer(fd);
+        success = TRUE;
+        // receive_disc_frame(fd, TRUE); // TEST
     }
 
     return !success;
@@ -112,7 +112,7 @@ void define_set_frame(unsigned char* set_frame) {
     set_frame[0] = FRAME_FLAG;
     set_frame[1] = ADDRESS_SENDER_RECEIVER;
     set_frame[2] = CONTROL_SET;
-    set_frame[3] = XOR(ADDRESS_SENDER_RECEIVER, CONTROL_SET);
+    set_frame[3] = XOR(set_frame[1], set_frame[2]);
     set_frame[4] = FRAME_FLAG;
 }
 
@@ -183,11 +183,6 @@ int read_receiver_answer(int fd) {
     }
 
     return success;
-}
-
-void alarm_handler() {
-    printf("alarm # %d\n", ++count);
-    success = 0;
 }
 
 int connect_to_receiver(int fd, unsigned char* set_frame) {

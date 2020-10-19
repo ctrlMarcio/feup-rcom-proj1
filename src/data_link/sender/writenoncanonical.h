@@ -9,15 +9,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-/**
- * @brief Defines the timeout between attempts in seconds.
- */
-#define TIMEOUT 3
-
-/**
- * @brief Defines the number of attempts per message sent.
- */
-#define NR_ATTEMPTS 3
+#include "../common.h"
 
 /**
  * @brief 
@@ -51,3 +43,5 @@ int send_information_frame(int fd, unsigned char *message, int frame_size);
  * @return int          the error code in case of error, 0 on success
  */
 int terminate_sender_connection(int fd, struct termios *oldtio);
+
+int send_disc_frame(int fd, unsigned char *disc_frame);

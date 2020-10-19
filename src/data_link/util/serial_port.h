@@ -33,6 +33,8 @@
  */
 #define CONTROL_UA 0x07
 
+#define CONTROL_DISC 0x0b
+
 /**
  * @brief States the control flag for the I message (one).
  * 
@@ -54,9 +56,9 @@
 
 #define CONTROL_REJ_ZERO 0x01
 
-#define CONTROL_DISC 0x0b
-
 #define MAX_FRAME_SIZE 102400 // 100 KByte
+
+enum frame{NONE, UA, SET, I, RR, REJ, DISC};
 
 typedef struct MessageConstructor
 {
@@ -64,3 +66,5 @@ typedef struct MessageConstructor
     char control;
     int data;
 } MessageConstruct;
+
+char get_control(enum frame type, int sequence_number);

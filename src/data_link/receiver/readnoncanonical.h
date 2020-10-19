@@ -9,6 +9,8 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "../common.h"
+
 /**
  * @brief 
  *

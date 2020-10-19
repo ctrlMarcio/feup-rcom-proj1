@@ -11,10 +11,10 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "../error/error.h"
+#include "../../error/error.h"
+#include "../../util/util.h"
 #include "../util/serial_port.h"
 #include "../util/state_machine.h"
-#include "../util/util.h"
 
 #define BAUDRATE B38400
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
@@ -32,18 +32,19 @@ void answer_establishment(int fd) {
     receive_set_frame(fd);
 
     unsigned char ua_frame[5];
-    define_ua_frame(ua_frame);
+    define_ua_frame(ua_frame, TRUE);
 
-    send_ua_frame(ua_frame, fd);
+    send_unanswered_frame(fd, ua_frame, 5, "UA");
 }
 
 void answer_information(int fd) {
-    receive_information_frame(fd);
+    // receive_information_frame(fd);
+    receive_frame(fd, MAX_FRAME_SIZE, I, TRUE, 0, TRUE);
 
     unsigned char rr_frame[5];
     define_rr_frame(rr_frame);
 
-    send_rr_frame(rr_frame, fd);
+    send_unanswered_frame(fd, rr_frame, 5, "RR");
     answer_sequence_number = 1 - answer_sequence_number; // alternate between 0 and 1
 }
 
@@ -82,7 +83,7 @@ void send_rr_frame(unsigned char* rr_frame, int fd) {
 
 void receive_information_frame(int fd) {
     unsigned char information_frame[MAX_FRAME_SIZE];
-    char buf[1];
+    char buf[255];
 
     char control_i;
     // Nr = 1 receives a Ns = 0
@@ -98,7 +99,9 @@ void receive_information_frame(int fd) {
 
     unsigned int i = 0;
     while (state != STOP) {
-        read(fd, buf, 1);
+        // printf("%d\n", i);
+        int res = read(fd, buf, 1);
+        if (res < 0) continue;
 
         if (buf[0] == ESCAPE) {
             read(fd, buf, 1);
@@ -139,15 +142,6 @@ void send_rej_frame(int fd) {
 
     int res = write(fd, rej_frame, sizeof(unsigned char) * 5);
     printf("%d bytes sent in a REJ frame\n", res);
-}
-
-void define_rej_frame(unsigned char* rej_frame) {
-    rej_frame[0] = FRAME_FLAG;
-    rej_frame[1] = ADDRESS_RECEIVER_SENDER;
-    rej_frame[2] = CONTROL_REJ_ZERO;
-    if (answer_sequence_number) rej_frame[2] = CONTROL_REJ_ONE;
-    rej_frame[3] = XOR(rej_frame[1], rej_frame[2]);
-    rej_frame[4] = FRAME_FLAG;
 }
 
 void define_rr_frame(unsigned char* rr_frame) {
