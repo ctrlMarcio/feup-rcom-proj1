@@ -13,7 +13,9 @@
  * @param port 
  * @return int 
  */
-int llopen(char *port, bool sender);
+int llopen(char *port, bool sender); // TODO replace bool with enum
+
+int llwrite(int fd, char *buffer, int length);
 
 /**
  * @brief 
@@ -21,4 +23,4 @@ int llopen(char *port, bool sender);
  * @param fd 
  * @return int 
  */
-int llclose(int fd, bool sender);
+int llclose(int fd);

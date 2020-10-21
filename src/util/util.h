@@ -45,10 +45,10 @@ int check_arguments(int argc, char **argv);
  * @param data 
  * @return unsigned char 
  */
-unsigned char xor_array(int data_size, unsigned char *data);
+unsigned char xor_array(int data_size, char *data);
 
 // returns the same array if there's an error
-void resize_array(unsigned char *array, unsigned size, unsigned char *res, unsigned first_index, unsigned res_size);
+void resize_array(char *array, unsigned size, char *res, unsigned first_index, unsigned res_size);
 
 /**
  * @brief 
@@ -58,4 +58,4 @@ void resize_array(unsigned char *array, unsigned size, unsigned char *res, unsig
  * @param new_data 
  * @return int      the size of the new data array
  */
-int stuff_data(unsigned char *data, int data_size, unsigned char *new_data);
+int stuff_data(char *data, int data_size, char *new_data);

@@ -17,6 +17,18 @@
 #define CONFIG_PORT_ERROR -2
 
 /**
- * @brief 
+ * @brief //TODO
  */
-#define ESTABLISHMENT_ERROR -3
+#define ESTABLISH_CONNECTION_ERROR -3
+
+/**
+ * @brief //TODO
+ * 
+ */
+#define CLOSE_CONNECTION_ERROR -4
+
+/**
+ * @brief //TODO
+ * 
+ */
+#define LOST_FRAME_ERROR -5

@@ -18,14 +18,8 @@ int main(int argc, char **argv) {
 
     // define the information frame
     int data_size = 32;
-    unsigned char data[32] = "ola flavia carvalho ~~carvalhido";
-    unsigned char new_data[MAX_FRAME_SIZE];
-    data_size = stuff_data(data, data_size, new_data);
-    unsigned char message[data_size + 6];
-    define_message_frame(message, new_data, data_size);
+    char data[32] = "ola flavia carvalho ~~carvalhido";
+    llwrite(fd, data, data_size);
 
-    // send the information frame
-    send_retransmission_frame(fd, message, data_size + 6, "I", RR, TRUE, 0);
-
-    return llclose(fd,TRUE);
+    return llclose(fd);
 }

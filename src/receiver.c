@@ -16,5 +16,5 @@ int main(int argc, char** argv) {
     // IMPLEMENTED UNTIL HERE WITH ASSIGNMENT CALLS !!!!!!!
     answer_information(fd);
 
-    return llclose(fd, FALSE);
+    return llclose(fd);
 }

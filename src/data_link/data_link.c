@@ -18,9 +18,11 @@
 #define BAUDRATE B38400
 
 struct termios oldtio;
+char write_sequence_number = 0;
+bool entity; // TODO replace with enum (rn true means sender, false means receiver)
 
 int open_serial_port(char* port);
-void define_disc_frame(unsigned char* disc_frame, bool sender_to_receiver);
+void define_disc_frame(char* disc_frame, bool sender_to_receiver);
 int close_sender(int fd);
 int close_receiver(int fd);
 void receive_disc_frame(int fd, bool sender);
@@ -28,18 +30,44 @@ void receive_disc_frame(int fd, bool sender);
 int llopen(char* port, bool sender) {
     int fd = open_serial_port(port);
     if (fd < 0)
-        return fd;
+        return CONFIG_PORT_ERROR;
 
     if (sender) {
         if (attempt_establishment(fd))
-            return ESTABLISHMENT_ERROR;
+            return ESTABLISH_CONNECTION_ERROR;
+        entity = TRUE;
     }
     else {
         answer_establishment(fd);
+        entity = FALSE;
     }
 
     return fd;
 }
+
+int llwrite(int fd, char *buffer, int length) {
+    char new_data[MAX_FRAME_SIZE];
+    length = stuff_data(buffer, length, new_data);
+    char message[length + 6];
+    define_message_frame(message, new_data, length);
+
+    // send the information frame
+    int sent_error = send_retransmission_frame(fd, message, length + 6, "I", RR, TRUE, write_sequence_number);
+    if (sent_error)
+        return LOST_FRAME_ERROR;
+    
+    write_sequence_number = 1 - write_sequence_number;
+    return length;
+}
+
+int llclose(int fd) {
+    if (entity)
+        return close_sender(fd);
+    else
+        return close_receiver(fd);
+}
+
+// private functions
 
 int open_serial_port(char* port) {
     struct termios newtio;
@@ -77,40 +105,36 @@ int open_serial_port(char* port) {
     return fd;
 }
 
-int llclose(int fd, bool sender) {
-    if (sender)
-        return close_sender(fd);
-    else
-        return close_receiver(fd);
-}
-
 int close_sender(int fd) {
-    unsigned char disc_frame[5];
+    char disc_frame[5];
     define_disc_frame(disc_frame, TRUE);
 
-    send_retransmission_frame(fd, disc_frame, 5, "DISC", DISC, TRUE, 0);
+    if (send_retransmission_frame(fd, disc_frame, 5, "DISC", DISC, TRUE, 0)) // TODO sequence number not required
+        return CLOSE_CONNECTION_ERROR;
 
-    unsigned char ua_frame[5];
+    char ua_frame[5];
     define_ua_frame(ua_frame, FALSE);
 
-    send_unanswered_frame(fd, ua_frame, 5, "UA");
+    if (send_unanswered_frame(fd, ua_frame, 5, "UA"))
+        return CLOSE_CONNECTION_ERROR;
 
     return terminate_sender_connection(fd, &oldtio);
 }
 
 int close_receiver(int fd) {
-    receive_frame(fd, 5, DISC, TRUE, 0, FALSE); // TODO sequence number not required
+    if (receive_frame(fd, 5, DISC, TRUE, 0, FALSE)) // TODO sequence number not required
+        return CLOSE_CONNECTION_ERROR;
 
-    unsigned char disc_frame[5];
+    char disc_frame[5];
     define_disc_frame(disc_frame, FALSE);
 
     if (send_retransmission_frame(fd, disc_frame, 5, "DISC", UA, FALSE, 1)) // TODO sequence number not required
-        printf("coiso\n");  // TODO error
+        return CLOSE_CONNECTION_ERROR;
 
     return terminate_sender_connection(fd, &oldtio);
 }
 
-void define_disc_frame(unsigned char* disc_frame, bool sender_to_receiver) {
+void define_disc_frame(char* disc_frame, bool sender_to_receiver) {
     disc_frame[0] = FRAME_FLAG;
     if (sender_to_receiver)
         disc_frame[1] = ADDRESS_SENDER_RECEIVER;
@@ -122,10 +146,10 @@ void define_disc_frame(unsigned char* disc_frame, bool sender_to_receiver) {
 }
 
 void receive_disc_frame(int fd, bool sender) {
-    unsigned char disc_frame[5];
+    char disc_frame[5];
     char buf[1];
 
-    unsigned char address;
+    char address;
     if (sender)
         address = ADDRESS_RECEIVER_SENDER;
     else
@@ -147,4 +171,4 @@ void receive_disc_frame(int fd, bool sender) {
     }
 }
 
-/* 🥰🧡💛💚💙💜🤎🖤🤍💕💞💓💗💖💘💝 :((( */
+/* 🥰🧡💛💚💙💜🤎🖤🤍💕💞💓💗💖💘💝 */

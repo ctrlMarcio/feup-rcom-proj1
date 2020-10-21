@@ -16,13 +16,13 @@ int check_arguments(int argc, char** argv) {
     return 0;
 }
 
-unsigned char xor_array(int data_size, unsigned char* data) {
+unsigned char xor_array(int data_size, char* data) {
     unsigned char result = data[0];
     for (unsigned int i = 1; i < data_size; i++) result = XOR(result, data[i]);
     return result;
 }
 
-void resize_array(unsigned char *array, unsigned size, unsigned char *res, unsigned first_index, unsigned res_size) {
+void resize_array(char *array, unsigned size, char *res, unsigned first_index, unsigned res_size) {
     if (first_index < 0 || first_index >= size || (first_index + res_size) > size)
         res = array;
 
@@ -31,7 +31,7 @@ void resize_array(unsigned char *array, unsigned size, unsigned char *res, unsig
         res[i] = array[first_index + i];
 }
 
-int stuff_data(unsigned char *data, int data_size, unsigned char *new_data) {
+int stuff_data(char *data, int data_size, char *new_data) {
     int j = 0;
     for (int i = 0; i < data_size; ++i) {
         if (data[i] == FRAME_FLAG || data[i] == ESCAPE)

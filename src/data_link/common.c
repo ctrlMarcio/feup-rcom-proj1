@@ -8,16 +8,16 @@
 
 int count, success;
 
-void define_rej_frame(unsigned char* rej_frame, int sequence_number);
+void define_rej_frame(char* rej_frame, int sequence_number);
 
-int send_frame(int fd, unsigned char* frame, unsigned frame_size, char* type, bool retransmission, enum frame answer_type, bool sender_to_receiver, int sequence_number) {
+int send_frame(int fd, char* frame, unsigned frame_size, char* type, bool retransmission, enum frame answer_type, bool sender_to_receiver, int sequence_number) {
     if (retransmission)
         return send_retransmission_frame(fd, frame, frame_size, type, answer_type, sender_to_receiver, sequence_number);
     else
         return send_unanswered_frame(fd, frame, frame_size, type);
 }
 
-int send_retransmission_frame(int fd, unsigned char* frame, unsigned frame_size, char* type, enum frame answer_type, bool sender_to_receiver, int sequence_number) {
+int send_retransmission_frame(int fd, char* frame, unsigned frame_size, char* type, enum frame answer_type, bool sender_to_receiver, int sequence_number) {
     (void)signal(SIGALRM, alarm_handler);
     count = 0, success = 0;
 
@@ -25,7 +25,7 @@ int send_retransmission_frame(int fd, unsigned char* frame, unsigned frame_size,
         if (success)
             break;
 
-        int res = write(fd, frame, sizeof(unsigned char) * frame_size);
+        int res = write(fd, frame, sizeof(char) * frame_size);
         alarm(TIMEOUT);
         printf("%d bytes sent in a %s frame\n", res, type);
 
@@ -40,8 +40,8 @@ int send_retransmission_frame(int fd, unsigned char* frame, unsigned frame_size,
     return !success;
 }
 
-int send_unanswered_frame(int fd, unsigned char* frame, unsigned frame_size, char* type) {
-    int res = write(fd, frame, sizeof(unsigned char) * frame_size);
+int send_unanswered_frame(int fd, char* frame, unsigned frame_size, char* type) {
+    int res = write(fd, frame, sizeof(char) * frame_size);
     if (res < 0)
         return 1;
 
@@ -50,7 +50,7 @@ int send_unanswered_frame(int fd, unsigned char* frame, unsigned frame_size, cha
 }
 
 int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_receiver, int sequence_number, bool expect_rej) {
-    unsigned char frame[size];
+    char frame[size];
     success = 1;
 
     // define message construct
@@ -100,21 +100,23 @@ int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_r
             // TODO this is ugly, save the data array and test in smaller functions :)
             if (data) {
                 int data_size = i - 5; // i + 1 is the frame size i + 1 - 6, minus the non data flags
-                unsigned char data_array[data_size];
+                char data_array[data_size];
                 resize_array(frame, i, data_array, 4, data_size);
                 unsigned char bcc2_result = xor_array(data_size, data_array);
                 if (bcc2_result != frame[i - 1]) {
-                    unsigned char rej_frame[5];
+                    char rej_frame[5];
                     define_rej_frame(rej_frame, !sequence_number);
 
                     send_unanswered_frame(fd, rej_frame, 5, "REJ");
                     return receive_frame(fd, MAX_FRAME_SIZE, I, TRUE, sequence_number, TRUE); // TODO temporary, let llread or something handle this or just continue mby try it
                 }
             }
+            alarm(0);
             success = TRUE;
             frame[i] = buf[0];
             break;
         }
+        
         else if (rej_state == STOP) { // if it reads a REJ frame, returns unsuccess
             alarm(0);                   // anticipates alarm
             alarm_handler();
@@ -128,10 +130,10 @@ int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_r
         i++;
     }
 
-    return success;
+    return !success;
 }
 
-void define_ua_frame(unsigned char* ua_frame, int sender_to_receiver) {
+void define_ua_frame(char* ua_frame, int sender_to_receiver) {
     ua_frame[0] = FRAME_FLAG;
     if (sender_to_receiver)
         ua_frame[1] = ADDRESS_SENDER_RECEIVER;
@@ -151,7 +153,7 @@ void alarm_handler() {
     success = 0;
 }
 
-void define_rej_frame(unsigned char* rej_frame, int sequence_number) {
+void define_rej_frame(char* rej_frame, int sequence_number) {
     rej_frame[0] = FRAME_FLAG;
     rej_frame[1] = ADDRESS_RECEIVER_SENDER;
     rej_frame[2] = get_control(REJ, sequence_number);

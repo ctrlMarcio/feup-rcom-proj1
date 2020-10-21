@@ -23,15 +23,15 @@ int answer_sequence_number = 1;
 
 void receive_set_frame(int fd);
 void receive_information_frame(int fd);
-void define_rr_frame(unsigned char* rr_frame);
-void send_rr_frame(unsigned char* rr_frame, int fd);
+void define_rr_frame(char* rr_frame);
+void send_rr_frame(char* rr_frame, int fd);
 void send_rej_frame(int fd);
-void define_rej_frame(unsigned char* rej_frame);
+void define_rej_frame(char* rej_frame);
 
 void answer_establishment(int fd) {
     receive_set_frame(fd);
 
-    unsigned char ua_frame[5];
+    char ua_frame[5];
     define_ua_frame(ua_frame, TRUE);
 
     send_unanswered_frame(fd, ua_frame, 5, "UA");
@@ -41,7 +41,7 @@ void answer_information(int fd) {
     // receive_information_frame(fd);
     receive_frame(fd, MAX_FRAME_SIZE, I, TRUE, 0, TRUE);
 
-    unsigned char rr_frame[5];
+    char rr_frame[5];
     define_rr_frame(rr_frame);
 
     send_unanswered_frame(fd, rr_frame, 5, "RR");
@@ -58,7 +58,7 @@ void terminate_receiver_connection(int fd, struct termios* oldtio) {
 ********************************************************/
 
 void receive_set_frame(int fd) {
-    unsigned char request_frame[5];
+    char request_frame[5];
     char buf[255];
 
     MessageConstruct set = { .address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_SET, .data = FALSE };
@@ -76,13 +76,13 @@ void receive_set_frame(int fd) {
     }
 }
 
-void send_rr_frame(unsigned char* rr_frame, int fd) {
-    int res = write(fd, rr_frame, sizeof(unsigned char) * 5);
+void send_rr_frame(char* rr_frame, int fd) {
+    int res = write(fd, rr_frame, sizeof(char) * 5);
     printf("%d bytes sent in a RR frame\n", res);
 }
 
 void receive_information_frame(int fd) {
-    unsigned char information_frame[MAX_FRAME_SIZE];
+    char information_frame[MAX_FRAME_SIZE];
     char buf[255];
 
     char control_i;
@@ -120,9 +120,9 @@ void receive_information_frame(int fd) {
         else if (state == STOP) {
             // TODO this is ugly, save the data array and test in smaller functions :)
             int data_size = i - 5; // i + 1 is the frame size i + 1 - 6, minus the non data flags
-            unsigned char data_array[data_size];
+            char data_array[data_size];
             resize_array(information_frame, i, data_array, 4, data_size);
-            unsigned char bcc2_result = xor_array(data_size, data_array);
+            char bcc2_result = xor_array(data_size, data_array);
             if (bcc2_result != information_frame[i - 1]) {
                 send_rej_frame(fd);
                 return receive_information_frame(fd); // TODO temporary, let llread or something handle this
@@ -137,14 +137,14 @@ void receive_information_frame(int fd) {
 }
 
 void send_rej_frame(int fd) {
-    unsigned char rej_frame[5];
+    char rej_frame[5];
     define_rej_frame(rej_frame);
 
-    int res = write(fd, rej_frame, sizeof(unsigned char) * 5);
+    int res = write(fd, rej_frame, sizeof(char) * 5);
     printf("%d bytes sent in a REJ frame\n", res);
 }
 
-void define_rr_frame(unsigned char* rr_frame) {
+void define_rr_frame(char* rr_frame) {
     rr_frame[0] = FRAME_FLAG;
     rr_frame[1] = ADDRESS_SENDER_RECEIVER;
     rr_frame[2] = CONTROL_RR_ZERO;

@@ -21,19 +21,19 @@
 int count = 0, success = 0;
 int sequence_number = 0;
 
-void define_set_frame(unsigned char* set_frame);
+void define_set_frame(char* set_frame);
 int read_ua_answer(int fd);
 int read_receiver_answer(int fd);
-int connect_to_receiver(int fd, unsigned char* set_frame);
+int connect_to_receiver(int fd, char* set_frame);
 
 int attempt_establishment(int fd) {
-    unsigned char set_frame[5];
+    char set_frame[5];
     define_set_frame(set_frame);
 
     return send_retransmission_frame(fd, set_frame, 5, "SET", UA, TRUE, 0); // TODO dont need for sequence number
 }
 
-int define_message_frame(unsigned char* message, unsigned char* data, int data_size) {
+int define_message_frame(char* message, char* data, int data_size) {
     message[0] = FRAME_FLAG;
     message[1] = ADDRESS_SENDER_RECEIVER;
     if (sequence_number)
@@ -51,7 +51,7 @@ int define_message_frame(unsigned char* message, unsigned char* data, int data_s
     return 0;
 }
 
-int send_information_frame(int fd, unsigned char* message, int frame_size) {
+int send_information_frame(int fd, char* message, int frame_size) {
     (void)signal(SIGALRM, alarm_handler);
 
     count = 0, success = 0;
@@ -62,7 +62,7 @@ int send_information_frame(int fd, unsigned char* message, int frame_size) {
             break;
 
         // sends the frame
-        int res = write(fd, message, sizeof(unsigned char) * frame_size);
+        int res = write(fd, message, sizeof(char) * frame_size);
         alarm(TIMEOUT);
         printf("%d bytes sent in an I frame\n", res);
 
@@ -75,7 +75,7 @@ int send_information_frame(int fd, unsigned char* message, int frame_size) {
     return !success;
 }
 
-int send_disc_frame(int fd, unsigned char *disc_frame) {
+int send_disc_frame(int fd, char *disc_frame) {
     (void)signal(SIGALRM, alarm_handler);
 
     count = 0, success = 0;
@@ -86,7 +86,7 @@ int send_disc_frame(int fd, unsigned char *disc_frame) {
             break;
 
         // sends the disc
-        int res = write(fd, disc_frame, sizeof(unsigned char) * 5);
+        int res = write(fd, disc_frame, sizeof(char) * 5);
         alarm(TIMEOUT);
         printf("%d bytes sent in a DISC frame\n", res);
 
@@ -108,7 +108,7 @@ int terminate_sender_connection(int fd, struct termios* oldtio) {
     return 0;
 }
 
-void define_set_frame(unsigned char* set_frame) {
+void define_set_frame(char* set_frame) {
     set_frame[0] = FRAME_FLAG;
     set_frame[1] = ADDRESS_SENDER_RECEIVER;
     set_frame[2] = CONTROL_SET;
@@ -117,7 +117,7 @@ void define_set_frame(unsigned char* set_frame) {
 }
 
 int read_ua_answer(int fd) {
-    unsigned char answer_frame[5];
+    char answer_frame[5];
     success = 1;
     int i = 0;
 
@@ -185,7 +185,7 @@ int read_receiver_answer(int fd) {
     return success;
 }
 
-int connect_to_receiver(int fd, unsigned char* set_frame) {
+int connect_to_receiver(int fd, char* set_frame) {
     (void)signal(SIGALRM, alarm_handler);
 
     // receives the answer_frame
@@ -194,7 +194,7 @@ int connect_to_receiver(int fd, unsigned char* set_frame) {
             break;
 
         // sends the set
-        int res = write(fd, set_frame, sizeof(unsigned char) * 5);
+        int res = write(fd, set_frame, sizeof(char) * 5);
         alarm(TIMEOUT);
         printf("%d bytes sent in a SET frame\n", res);
 

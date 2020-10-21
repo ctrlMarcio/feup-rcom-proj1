@@ -25,7 +25,7 @@ int attempt_establishment(int fd);
  * @param message the built message as an array
  * @return int 0 if success, 1 otherwise
  */
-int define_message_frame(unsigned char *message, unsigned char *data, int data_size);
+int define_message_frame(char *message, char *data, int data_size);
 
 /**
  * @brief Sends the message
@@ -33,7 +33,7 @@ int define_message_frame(unsigned char *message, unsigned char *data, int data_s
  * @param message the built message as an array
  * @return int
  */
-int send_information_frame(int fd, unsigned char *message, int frame_size);
+int send_information_frame(int fd, char *message, int frame_size);
 
 /**
  * @brief Terminates the connection to the port.
@@ -44,4 +44,4 @@ int send_information_frame(int fd, unsigned char *message, int frame_size);
  */
 int terminate_sender_connection(int fd, struct termios *oldtio);
 
-int send_disc_frame(int fd, unsigned char *disc_frame);
+int send_disc_frame(int fd, char *disc_frame);
