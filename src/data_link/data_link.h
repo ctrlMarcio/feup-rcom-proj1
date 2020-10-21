@@ -17,6 +17,8 @@ int llopen(char *port, bool sender); // TODO replace bool with enum
 
 int llwrite(int fd, char *buffer, int length);
 
+int llread(int fd, char *buffer);
+
 /**
  * @brief 
  * 

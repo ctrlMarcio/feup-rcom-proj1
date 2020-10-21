@@ -18,7 +18,7 @@
  */
 void answer_establishment(int fd);
 
-void answer_information(int fd);
+int answer_information(int fd, char *buffer);
 
 /**
  * @brief Terminates the connection to the port.

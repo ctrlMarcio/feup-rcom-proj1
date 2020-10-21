@@ -60,6 +60,14 @@ int llwrite(int fd, char *buffer, int length) {
     return length;
 }
 
+int llread(int fd, char *buffer) {
+    int size;
+    if ((size = answer_information(fd, buffer)) < 0)
+        return LOST_FRAME_ERROR;
+
+    return size;
+}
+
 int llclose(int fd) {
     if (entity)
         return close_sender(fd);

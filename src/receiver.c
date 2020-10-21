@@ -5,6 +5,7 @@
 #include "data_link/data_link.h"
 #include "data_link/receiver/readnoncanonical.h"
 #include "util/util.h"
+#include "application/util/util.h"
 
 int main(int argc, char** argv) {
     int res;
@@ -14,7 +15,8 @@ int main(int argc, char** argv) {
     int fd = llopen(argv[1], FALSE);
 
     // IMPLEMENTED UNTIL HERE WITH ASSIGNMENT CALLS !!!!!!!
-    answer_information(fd);
+    char asdlfkmsdalkfmasdf[MAX_FRAME_SIZE];
+    llread(fd, asdlfkmsdalkfmasdf);
 
     return llclose(fd);
 }

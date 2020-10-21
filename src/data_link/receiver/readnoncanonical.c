@@ -37,15 +37,19 @@ void answer_establishment(int fd) {
     send_unanswered_frame(fd, ua_frame, 5, "UA");
 }
 
-void answer_information(int fd) {
-    // receive_information_frame(fd);
-    receive_frame(fd, MAX_FRAME_SIZE, I, TRUE, 0, TRUE);
+int answer_information(int fd, char *buffer) {
+    int data_size;
+    if ((data_size = receive_data_frame(fd, !answer_sequence_number, buffer)) < 0)
+        return LOST_FRAME_ERROR;
 
     char rr_frame[5];
     define_rr_frame(rr_frame);
 
-    send_unanswered_frame(fd, rr_frame, 5, "RR");
+    if (send_unanswered_frame(fd, rr_frame, 5, "RR"))
+        return LOST_FRAME_ERROR;
+    
     answer_sequence_number = 1 - answer_sequence_number; // alternate between 0 and 1
+    return data_size;
 }
 
 void terminate_receiver_connection(int fd, struct termios* oldtio) {

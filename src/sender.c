@@ -14,8 +14,6 @@ int main(int argc, char **argv) {
 
     int fd = llopen(argv[1], TRUE);
 
-    // IMPLEMENTED UNTIL HERE WITH ASSIGNMENT CALLS !!!!!!!
-
     // define the information frame
     int data_size = 32;
     char data[32] = "ola flavia carvalho ~~carvalhido";

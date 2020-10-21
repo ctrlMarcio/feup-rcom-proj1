@@ -1,0 +1,7 @@
+#define CONTROL_DATA 1
+#define CONTROL_START 2
+#define CONTROL_END 3
+
+#define TYPE_FILE_SIZE 0
+#define TYPE_FILE_NAME 1
+

@@ -4,11 +4,14 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include "util/state_machine.h"
 
+#include "util/state_machine.h"
+#include "../error/error.h"
 int count, success;
 
 void define_rej_frame(char* rej_frame, int sequence_number);
+int parse_data(int data_size, char* data_array, int fd, int i, char* frame, int sequence_number, char* buffer);
+
 
 int send_frame(int fd, char* frame, unsigned frame_size, char* type, bool retransmission, enum frame answer_type, bool sender_to_receiver, int sequence_number) {
     if (retransmission)
@@ -50,7 +53,9 @@ int send_unanswered_frame(int fd, char* frame, unsigned frame_size, char* type) 
 }
 
 int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_receiver, int sequence_number, bool expect_rej) {
-    char frame[size];
+    if (frame_type == I) // compatibility ig
+        return 1; // FIXME
+
     success = 1;
 
     // define message construct
@@ -77,8 +82,57 @@ int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_r
         int res = read(fd, buf, 1);
         if (res < 0) continue;
 
+        // update machine states
+        update_state(&state, buf[0], construct);
+
+        if (expect_rej)
+            update_state(&rej_state, buf[0], rej);
+
+        // reset if finds flag for the first time
+        if (state == FLAG_RCV && (!expect_rej || rej_state == FLAG_RCV))
+            i = 0;
+        else if (state == STOP) { // terminate if reads all
+            alarm(0);
+            success = TRUE;
+            break;
+        }
+
+        else if (rej_state == STOP) { // if it reads a REJ frame, returns unsuccess
+            alarm(0);                   // anticipates alarm
+            alarm_handler();
+            success = FALSE;
+            break;
+        }
+
+        // updates the answer frame
+        // printf("%c", frame[i]); // TEST
+
+        i++;
+    }
+
+    return !success;
+}
+
+int receive_data_frame(int fd, int sequence_number, char *buffer) {
+    char frame[MAX_FRAME_SIZE];
+    success = 1;
+    int data_size = LOST_FRAME_ERROR;
+
+    // define message construct
+    char control = get_control(I, sequence_number);
+    MessageConstruct construct = { .address = ADDRESS_SENDER_RECEIVER, .control = control, .data = TRUE };
+    enum set_state state = START;
+
+    char buf[255] = { 0 };
+
+    unsigned int i = 0;
+    while (success) {
+        // read from the port
+        int res = read(fd, buf, 1);
+        if (res < 0) continue;
+
         // destuffing
-        if (data && buf[0] == ESCAPE) {
+        if (buf[0] == ESCAPE) {
             // reads the next character and saves it promptly without updating the state machine
             read(fd, buf, 1);
             frame[i] = buf[0];
@@ -90,39 +144,22 @@ int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_r
         // update machine states
         update_state(&state, buf[0], construct);
 
-        if (expect_rej)
-            update_state(&rej_state, buf[0], rej);
-
         // reset if finds flag for the first time
-        if (state == FLAG_RCV && (!expect_rej || rej_state == FLAG_RCV))
+        if (state == FLAG_RCV)
             i = 0;
         else if (state == STOP) { // terminate if reads all
-            // TODO this is ugly, save the data array and test in smaller functions :)
-            if (data) {
-                int data_size = i - 5; // i + 1 is the frame size i + 1 - 6, minus the non data flags
-                char data_array[data_size];
-                resize_array(frame, i, data_array, 4, data_size);
-                unsigned char bcc2_result = xor_array(data_size, data_array);
-                if (bcc2_result != frame[i - 1]) {
-                    char rej_frame[5];
-                    define_rej_frame(rej_frame, !sequence_number);
-
-                    send_unanswered_frame(fd, rej_frame, 5, "REJ");
-                    return receive_frame(fd, MAX_FRAME_SIZE, I, TRUE, sequence_number, TRUE); // TODO temporary, let llread or something handle this or just continue mby try it
-                }
+            data_size = i - 5; // i + 1 is the frame size i + 1 - 6, minus the non data flags
+            data_size = parse_data(data_size, buffer, fd, i, frame, sequence_number, buffer);
+            if (data_size < 0) {
+                success = FALSE;
+            } else {
+                success = TRUE;
+                frame[i] = buf[0];
             }
-            alarm(0);
-            success = TRUE;
-            frame[i] = buf[0];
-            break;
-        }
-        
-        else if (rej_state == STOP) { // if it reads a REJ frame, returns unsuccess
-            alarm(0);                   // anticipates alarm
-            alarm_handler();
-            break;
-        }
 
+            alarm(0);
+            break;
+        }
         // updates the answer frame
         frame[i] = buf[0];
         // printf("%c", frame[i]); // TEST
@@ -130,7 +167,23 @@ int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_r
         i++;
     }
 
-    return !success;
+    return data_size;
+}
+
+int parse_data(int data_size, char* data_array, int fd, int i, char* frame, int sequence_number, char *buffer) {
+    resize_array(frame, i, data_array, 4, data_size);
+    unsigned char bcc2_result = xor_array(data_size, data_array);
+
+    if (bcc2_result != frame[i - 1]) {
+        char rej_frame[5];
+        define_rej_frame(rej_frame, !sequence_number);
+
+        if (send_unanswered_frame(fd, rej_frame, 5, "REJ"))
+            return LOST_FRAME_ERROR;
+        return receive_data_frame(fd, sequence_number, buffer);
+    }
+
+    return data_size;
 }
 
 void define_ua_frame(char* ua_frame, int sender_to_receiver) {
@@ -138,7 +191,7 @@ void define_ua_frame(char* ua_frame, int sender_to_receiver) {
     if (sender_to_receiver)
         ua_frame[1] = ADDRESS_SENDER_RECEIVER;
     else
-        ua_frame[1] = ADDRESS_RECEIVER_SENDER; 
+        ua_frame[1] = ADDRESS_RECEIVER_SENDER;
     ua_frame[2] = CONTROL_UA;
     ua_frame[3] = XOR(ua_frame[1], ua_frame[2]);
     ua_frame[4] = FRAME_FLAG;
