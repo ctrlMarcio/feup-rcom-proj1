@@ -42,3 +42,11 @@ int stuff_data(char *data, int data_size, char *new_data) {
 
     return j;
 }
+
+int append_array(char *original, int size, char* to_append, int to_append_size) {
+    int i = 0;
+    for (; i < to_append_size; ++i)
+        original[size + i] = to_append[i];
+
+    return size + i;
+}

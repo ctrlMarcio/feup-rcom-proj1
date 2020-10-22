@@ -10,7 +10,7 @@ SENDER_EXECUTABLE = sender
 RECEIVER_EXECUTABLE = receiver
 
 # Compiling extensions
-COMPILATION_EXTENSIONS = -Wall -o
+COMPILATION_EXTENSIONS = -Wall -lm
 
 # The names of the .c source files
 COMMON_SRC = ${SRC_DIR}/data_link/data_link.c ${SRC_DIR}/data_link/sender/writenoncanonical.c \
@@ -23,8 +23,8 @@ SRC_FILES = ${SENDER_SRC} ${RECEIVER_SRC}
 
 make: ${SRC_FILES}
 	@mkdir -p $(BIN_DIR)
-	@$(CC) ${COMPILATION_EXTENSIONS} $(BIN_DIR)/${SENDER_EXECUTABLE} ${SENDER_SRC};
-	@$(CC) ${COMPILATION_EXTENSIONS}  $(BIN_DIR)/${RECEIVER_EXECUTABLE} ${RECEIVER_SRC}
+	@$(CC) -o $(BIN_DIR)/${SENDER_EXECUTABLE} ${SENDER_SRC} ${COMPILATION_EXTENSIONS};
+	@$(CC) -o $(BIN_DIR)/${RECEIVER_EXECUTABLE} ${RECEIVER_SRC} ${COMPILATION_EXTENSIONS}
 
 clean:
 	@rm -f {BIN_DIR}/*
