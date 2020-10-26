@@ -25,7 +25,7 @@ int attempt_establishment(int fd);
  * @param message the built message as an array
  * @return int 0 if success, 1 otherwise
  */
-int define_message_frame(char *message, char *data, int data_size);
+int define_message_frame(char* message, char* data, int data_size, int sequence_number);
 
 /**
  * @brief Sends the message
@@ -33,7 +33,7 @@ int define_message_frame(char *message, char *data, int data_size);
  * @param message the built message as an array
  * @return int
  */
-int send_information_frame(int fd, char *message, int frame_size);
+int send_information_frame(int fd, char *message, int frame_size, int sequence_number);
 
 /**
  * @brief Terminates the connection to the port.

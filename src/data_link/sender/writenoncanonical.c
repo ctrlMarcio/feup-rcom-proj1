@@ -19,11 +19,10 @@
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 
 int count = 0, success = 0;
-int sequence_number = 0;
 
 void define_set_frame(char* set_frame);
 int read_ua_answer(int fd);
-int read_receiver_answer(int fd);
+int read_receiver_answer(int fd, int sequence_number);
 int connect_to_receiver(int fd, char* set_frame);
 
 int attempt_establishment(int fd) {
@@ -33,7 +32,7 @@ int attempt_establishment(int fd) {
     return send_retransmission_frame(fd, set_frame, 5, "SET", UA, TRUE, 0); // TODO dont need for sequence number
 }
 
-int define_message_frame(char* message, char* data, int data_size) {
+int define_message_frame(char* message, char* data, int data_size, int sequence_number) {
     message[0] = FRAME_FLAG;
     message[1] = ADDRESS_SENDER_RECEIVER;
     if (sequence_number)
@@ -45,13 +44,12 @@ int define_message_frame(char* message, char* data, int data_size) {
     for (unsigned int i = 0; i < data_size; i++)
         message[i + 4] = data[i];
 
-    message[data_size + 4] = xor_array(data_size, data);
-    message[data_size + 5] = FRAME_FLAG;
+    message[data_size + 4] = FRAME_FLAG;
 
     return 0;
 }
 
-int send_information_frame(int fd, char* message, int frame_size) {
+int send_information_frame(int fd, char* message, int frame_size, int sequence_number) {
     (void)signal(SIGALRM, alarm_handler);
 
     count = 0, success = 0;
@@ -66,7 +64,7 @@ int send_information_frame(int fd, char* message, int frame_size) {
         alarm(TIMEOUT);
         printf("%d bytes sent in an I frame\n", res);
 
-        read_receiver_answer(fd);
+        read_receiver_answer(fd, sequence_number);
     }
 
     if (success)
@@ -143,7 +141,7 @@ int read_ua_answer(int fd) {
     return success;
 }
 
-int read_receiver_answer(int fd) {
+int read_receiver_answer(int fd, int sequence_number) {
     success = 1;
     int i = 0;
 

@@ -129,13 +129,13 @@ int receive_data_frame(int fd, int sequence_number, char *buffer) {
     while (success) {
         // read from the port
         int res = read(fd, buf, 1);
-        if (res < 0) continue;
+        if (res <= 0) continue;
 
         // destuffing
         if (buf[0] == ESCAPE) {
             // reads the next character and saves it promptly without updating the state machine
             read(fd, buf, 1);
-            frame[i] = buf[0];
+            frame[i] = XOR(buf[0], STUFF_FLAG);
 
             i++;
             continue;
@@ -162,8 +162,6 @@ int receive_data_frame(int fd, int sequence_number, char *buffer) {
         }
         // updates the answer frame
         frame[i] = buf[0];
-        // printf("%c", frame[i]); // TEST
-
         i++;
     }
 

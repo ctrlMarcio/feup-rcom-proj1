@@ -22,28 +22,31 @@ unsigned char xor_array(int data_size, char* data) {
     return result;
 }
 
-void resize_array(char *array, unsigned size, char *res, unsigned first_index, unsigned res_size) {
+void resize_array(char* array, unsigned size, char* res, unsigned first_index, unsigned res_size) {
     if (first_index < 0 || first_index >= size || (first_index + res_size) > size)
         res = array;
 
     int i = 0;
-    for(; i < res_size; ++i)
+    for (; i < res_size; ++i)
         res[i] = array[first_index + i];
 }
 
-int stuff_data(char *data, int data_size, char *new_data) {
+int stuff_data(char* data, int data_size, char* new_data) {
     int j = 0;
     for (int i = 0; i < data_size; ++i) {
-        if (data[i] == FRAME_FLAG || data[i] == ESCAPE)
+        if (data[i] == FRAME_FLAG || data[i] == ESCAPE) {
             new_data[j++] = ESCAPE;
-
-        new_data[j++] = data[i];
+            new_data[j++] = XOR(data[i], STUFF_FLAG);
+        }
+        else {
+            new_data[j++] = data[i];
+        }
     }
 
     return j;
 }
 
-int append_array(char *original, int size, char* to_append, int to_append_size) {
+int append_array(char* original, int size, char* to_append, int to_append_size) {
     int i = 0;
     for (; i < to_append_size; ++i)
         original[size + i] = to_append[i];

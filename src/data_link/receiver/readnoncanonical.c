@@ -85,61 +85,6 @@ void send_rr_frame(char* rr_frame, int fd) {
     printf("%d bytes sent in a RR frame\n", res);
 }
 
-void receive_information_frame(int fd) {
-    char information_frame[MAX_FRAME_SIZE];
-    char buf[255];
-
-    char control_i;
-    // Nr = 1 receives a Ns = 0
-    if (answer_sequence_number)
-        control_i = CONTROL_I_ZERO;
-    else
-        control_i = CONTROL_I_ONE;
-
-    MessageConstruct set = { .address = ADDRESS_SENDER_RECEIVER, .control = control_i, .data = TRUE };
-    enum set_state state = START;
-
-    // TODO save data in an array
-
-    unsigned int i = 0;
-    while (state != STOP) {
-        // printf("%d\n", i);
-        int res = read(fd, buf, 1);
-        if (res < 0) continue;
-
-        if (buf[0] == ESCAPE) {
-            read(fd, buf, 1);
-
-            information_frame[i] = buf[0];
-
-            // printf("%c\n", information_frame[i]);  // TEST
-            i++;
-            continue;
-        }
-
-        update_state(&state, buf[0], set);
-
-        if (state == FLAG_RCV)
-            i = 0;
-        else if (state == STOP) {
-            // TODO this is ugly, save the data array and test in smaller functions :)
-            int data_size = i - 5; // i + 1 is the frame size i + 1 - 6, minus the non data flags
-            char data_array[data_size];
-            resize_array(information_frame, i, data_array, 4, data_size);
-            char bcc2_result = xor_array(data_size, data_array);
-            if (bcc2_result != information_frame[i - 1]) {
-                send_rej_frame(fd);
-                return receive_information_frame(fd); // TODO temporary, let llread or something handle this
-            }
-        }
-
-        information_frame[i] = buf[0];
-
-        // printf("%c\n", information_frame[i]);  // TEST
-        i++;
-    }
-}
-
 void send_rej_frame(int fd) {
     char rej_frame[5];
     define_rej_frame(rej_frame);

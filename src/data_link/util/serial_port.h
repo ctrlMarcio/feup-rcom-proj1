@@ -48,18 +48,44 @@
  */
 #define CONTROL_I_ZERO 0x00
 
+/**
+ *
+ */
 #define CONTROL_RR_ONE 0x85
 
+/**
+ *
+ */
 #define CONTROL_RR_ZERO 0x05
 
+/**
+*
+*/
 #define CONTROL_REJ_ONE 0x81
 
+/**
+ *
+*/
 #define CONTROL_REJ_ZERO 0x01
 
+/**
+ *
+ */
+#define STUFF_FLAG 0x20
+
+/**
+ *
+ */
 #define MAX_FRAME_SIZE 102400 // 100 KByte
 
+/**
+ *
+ */
 enum frame{NONE, UA, SET, I, RR, REJ, DISC};
 
+/**
+ *
+ */
 typedef struct MessageConstructor
 {
     char address;
@@ -67,4 +93,7 @@ typedef struct MessageConstructor
     int data;
 } MessageConstruct;
 
+/**
+ *
+ */
 char get_control(enum frame type, int sequence_number);

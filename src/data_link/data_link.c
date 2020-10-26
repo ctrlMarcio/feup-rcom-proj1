@@ -47,9 +47,16 @@ int llopen(char* port, bool sender) {
 
 int llwrite(int fd, char *buffer, int length) {
     char new_data[MAX_FRAME_SIZE];
-    length = stuff_data(buffer, length, new_data);
-    char message[length + 6];
-    define_message_frame(message, new_data, length);
+    char bcc2 = xor_array(length, buffer);
+
+    char bufferBcc[length+1];
+    for (int i = 0; i < length; ++i)
+        bufferBcc[i] = buffer[i];
+    bufferBcc[length] = bcc2;
+
+    length = stuff_data(bufferBcc, length+1, new_data);
+    char message[length + 5];
+    define_message_frame(message, new_data, length, write_sequence_number);
 
     // send the information frame
     int sent_error = send_retransmission_frame(fd, message, length + 6, "I", RR, TRUE, write_sequence_number);

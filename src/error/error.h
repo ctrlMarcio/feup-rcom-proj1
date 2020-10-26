@@ -32,3 +32,7 @@
  * 
  */
 #define LOST_FRAME_ERROR -5
+
+#define LOST_START_PACKET_ERROR -6
+
+#define INVALID_CTRL_PACKET_TYPE -7

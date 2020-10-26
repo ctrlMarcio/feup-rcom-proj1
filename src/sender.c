@@ -8,19 +8,33 @@
 #include "util/util.h"
 #include "application/application_protocol.h"
 
-int main(int argc, char **argv) {
-    // int res;
-    // if ((res = check_arguments(argc, argv)))
-    //     return res;
+int test_data_link(int argc, char** argv) {
+    int res;
+    if ((res = check_arguments(argc, argv)))
+        return res;
 
-    // int fd = llopen(argv[1], TRUE);
+    int fd = llopen(argv[1], TRUE);
 
-    // // define the information frame
-    // int data_size = 32;
-    // char data[32] = "ola flavia carvalho ~~carvalhido";
-    // llwrite(fd, data, data_size);
+    // define the information frame
+    int data_size = 33;
+    char data[33] = "ola marcio {carvalho} ~carvalhido";
+    llwrite(fd, data, data_size);
 
-    // return llclose(fd);
+    data_size = 17;
+    char bro[17] = "macaquinho ihihih";
+    llwrite(fd, bro, data_size);
 
-    send_start_control_packet(1, KB, "marcio");
+    return llclose(fd);
+}
+
+int main(int argc, char** argv) {
+    // receive filename
+    // verify size
+    send_start_control_packet(502, GB, "marcio");
+
+    // while
+    // read X bytes
+    // send those bytes
+
+    // end packet
 }
