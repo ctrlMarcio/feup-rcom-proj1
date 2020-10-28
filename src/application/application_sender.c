@@ -1,4 +1,4 @@
-#include "application_protocol.h"
+#include "application_sender.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -12,18 +12,19 @@
 #include "../data_link/util/serial_port.h"
 #include "../error/error.h"
 
-long file_size;
+int sequence_number = 0;
+int fd;
 
 int get_packet_size(int file_size, enum unit_measure unit, char* file_name);
 void build_control_packet(char* control_packet, int file_size, enum unit_measure unit, char* file_name);
-long parse_start_control_packet(char* file_name, char* packet, int packet_size);
+int build_data_packet(char* data, long data_size, char* buffer);
 
 int send_start_control_packet(int file_size, enum unit_measure unit, char* file_name) {
     int packet_size = get_packet_size(file_size, unit, file_name);
     char control_packet[packet_size];
     build_control_packet(control_packet, file_size, unit, file_name);
 
-    int fd = llopen("/dev/ttyS10", 1);      // TODO: save FD in global variable for later use and replace the literal string
+    fd = llopen("/dev/ttyS10", 1);      // TODO: save FD in global variable for later use and replace the literal string
     if (fd < 0)
         return CONFIG_PORT_ERROR;
 
@@ -34,17 +35,17 @@ int send_start_control_packet(int file_size, enum unit_measure unit, char* file_
     return written_bytes;
 }
 
-long receive_start_control_packet(char* file_name) {
-    int fd = llopen("/dev/ttyS11", 0);      // TODO: replace the literal string
-    if (fd < 0)
-        return CONFIG_PORT_ERROR;
+long send_data_packet(char* data, long data_size) {
+    char buffer[MAX_PACKET_SIZE];
+    int buffer_size = build_data_packet(data, data_size, buffer);
 
-    char buffer[MAX_FRAME_SIZE];
-    int read_bytes = llread(fd, buffer);
-    if (read_bytes < 0)
-        return LOST_START_PACKET_ERROR;
+    int sent;
+    if ((sent = llwrite(fd, buffer, buffer_size)) < 0)
+        return sent;
 
-    return parse_start_control_packet(file_name, buffer, read_bytes);
+    sequence_number = (sequence_number + 1) % 255;
+
+    return sent;
 }
 
 // PRIVATE FUNCTIONS
@@ -80,41 +81,15 @@ void build_control_packet(char* control_packet, int file_size, enum unit_measure
     append_array(control_packet, i, file_name, l2);
 }
 
-long parse_start_control_packet(char* file_name, char* packet, int packet_size) {
-    int l1, l2;
-    char* v1;
-    long size = 0;
+int build_data_packet(char* data, long data_size, char* buffer) {
 
-    for (int i = 1; i < packet_size; ++i) {
-        int type = packet[i++];
+    buffer[0] = CONTROL_DATA;
+    buffer[1] = sequence_number;
 
-        switch (type)
-        {
-        case TYPE_FILE_SIZE:
-            l1 = packet[i];
-            v1 = (char*)malloc(sizeof(char) * l1);
+    char l2l1[2];
+    size_in_octets(data_size, l2l1, 2);
+    buffer[2] = l2l1[0];
+    buffer[3] = l2l1[1];
 
-            for (int j = 0; j < l1; j++)
-                v1[j] = packet[++i];
-
-            size = octets_to_size(v1, l1);
-
-            break;
-
-        case TYPE_FILE_NAME:
-            l2 = packet[i];
-
-            for (int j = 0; j < l2; j++)
-                file_name[j] = packet[++i];
-
-            break;
-            
-        default:
-            return INVALID_CTRL_PACKET_TYPE;
-        }
-    }
-
-    free(v1);
-
-    return size;
+    return append_array(buffer, 4, data, data_size);
 }

@@ -70,3 +70,11 @@ int stuff_data(char *data, int data_size, char *new_data);
  * @return int      the new size of the array
  */
 int append_array(char *original, int size, char* to_append, int to_append_size);
+
+/**
+ * @brief Calculates the size of a file in bytes.
+ * 
+ * @param file_name     the name of the file
+ * @return long         the size of the file
+ */
+long get_file_size(char *file_name);

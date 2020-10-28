@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <sys/stat.h>
 
 #include "../data_link/util/serial_port.h"
 #include "../error/error.h"
@@ -52,4 +53,13 @@ int append_array(char* original, int size, char* to_append, int to_append_size) 
         original[size + i] = to_append[i];
 
     return size + i;
+}
+
+long get_file_size(char *file_name) {
+    struct stat st;
+    long size;
+    stat(file_name, &st);
+    size = st.st_size;
+
+    return size;
 }

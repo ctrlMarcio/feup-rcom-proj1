@@ -78,6 +78,8 @@
  */
 #define MAX_FRAME_SIZE 102400 // 100 KByte
 
+#define MAX_PACKET_SIZE (MAX_FRAME_SIZE + 4) // 100 KByte
+
 /**
  *
  */

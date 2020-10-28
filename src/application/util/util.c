@@ -29,7 +29,6 @@ void size_in_octets(long file_size, char* size_in_octets, unsigned arr_size) {
         file_size = file_size >> 8;
         octet = (unsigned char)file_size;
     }
-
 }
 
 long octets_to_size(char* octets, int octets_length) {
