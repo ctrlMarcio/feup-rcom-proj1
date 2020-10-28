@@ -116,7 +116,7 @@ int open_serial_port(char* port) {
         return CONFIG_PORT_ERROR;
     }
 
-    printf("New termios structure set\n");
+    if (OUTPUT) printf("New termios structure set\n");
     return fd;
 }
 

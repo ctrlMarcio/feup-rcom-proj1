@@ -30,7 +30,7 @@ int send_retransmission_frame(int fd, char* frame, unsigned frame_size, char* ty
 
         int res = write(fd, frame, sizeof(char) * frame_size);
         alarm(TIMEOUT);
-        printf("%d bytes sent in a %s frame\n", res, type);
+        if (OUTPUT) printf("%d bytes sent in a %s frame\n", res, type);
 
         if (answer_type == UA)
             receive_frame(fd, 5, UA, sender_to_receiver, !sequence_number, FALSE);
@@ -48,7 +48,7 @@ int send_unanswered_frame(int fd, char* frame, unsigned frame_size, char* type) 
     if (res < 0)
         return 1;
 
-    printf("%d bytes sent in a %s frame\n", res, type);
+    if (OUTPUT) printf("%d bytes sent in a %s frame\n", res, type);
     return 0;
 }
 
@@ -104,16 +104,13 @@ int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_r
             break;
         }
 
-        // updates the answer frame
-        // printf("%c", frame[i]); // TEST
-
         i++;
     }
 
     return !success;
 }
 
-int receive_data_frame(int fd, int sequence_number, char *buffer) {
+int receive_data_frame(int fd, int sequence_number, char* buffer) {
     char frame[MAX_FRAME_SIZE];
     success = 1;
     int data_size = LOST_FRAME_ERROR;
@@ -152,7 +149,8 @@ int receive_data_frame(int fd, int sequence_number, char *buffer) {
             data_size = parse_data(data_size, buffer, fd, i, frame, sequence_number, buffer);
             if (data_size < 0) {
                 success = FALSE;
-            } else {
+            }
+            else {
                 success = TRUE;
                 frame[i] = buf[0];
             }
@@ -168,9 +166,9 @@ int receive_data_frame(int fd, int sequence_number, char *buffer) {
     return data_size;
 }
 
-int parse_data(int data_size, char* data_array, int fd, int i, char* frame, int sequence_number, char *buffer) {
+int parse_data(int data_size, char* data_array, int fd, int i, char* frame, int sequence_number, char* buffer) {
     resize_array(frame, i, data_array, 4, data_size);
-    unsigned char bcc2_result = xor_array(data_size, data_array);
+    char bcc2_result = xor_array(data_size, data_array);
 
     if (bcc2_result != frame[i - 1]) {
         char rej_frame[5];
@@ -200,7 +198,7 @@ void define_ua_frame(char* ua_frame, int sender_to_receiver) {
 ********************************************************/
 
 void alarm_handler() {
-    printf("alarm # %d\n", ++count);
+    if (OUTPUT) printf("alarm # %d\n", ++count);
     success = 0;
 }
 

@@ -7,6 +7,8 @@
 #include "data_link/util/serial_port.h"
 #include "util/util.h"
 #include "application/application_sender.h"
+#include "application/util/protocol.h"
+#include "application/util/io.h"
 #include "error/error.h"
 
 int test_data_link(int argc, char** argv) {
@@ -39,22 +41,27 @@ int main(int argc, char** argv) {
 
     // send start control packet
     send_start_control_packet(size, B, file_name);
+    printf("%s\n", CONNECTION_ESTABLISHED);
 
     // open file
     FILE* file = fopen(file_name, "r");
+    // TODO verify open error
 
-    // while
-    // read X bytes
-    // send those bytes
+    char data[DATA_SIZE];
+    int read_size;
+    // while the file has more than DATA_SIZE bytes to read
+    while ((read_size = fread(data, sizeof(char), DATA_SIZE, file)) == DATA_SIZE) {
+        send_data_packet(data, read_size); // TODO fail if the sending fails
+    }
 
-    // TEST read from the file
-    char data[size];
-
-    fread(data, 1, size, file);
-    send_data_packet(data, size);
+    // if there are still some information in the file
+    if (read_size > 0)
+        send_data_packet(data, read_size);
 
     //close file
     fclose(file);
+
+    printf("%s\n", FILE_SENT);
 
     // end packet
 }

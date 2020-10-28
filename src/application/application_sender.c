@@ -24,7 +24,7 @@ int send_start_control_packet(int file_size, enum unit_measure unit, char* file_
     char control_packet[packet_size];
     build_control_packet(control_packet, file_size, unit, file_name);
 
-    fd = llopen("/dev/ttyS10", 1);      // TODO: save FD in global variable for later use and replace the literal string
+    fd = llopen("/dev/ttyS10", 1);      // TODO:  replace the literal string
     if (fd < 0)
         return CONFIG_PORT_ERROR;
 

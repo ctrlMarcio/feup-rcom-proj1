@@ -6,6 +6,8 @@
 
 #pragma once
 
+#define OUTPUT 0
+
 /**
  * @brief States the beginning and end of a message.
  */

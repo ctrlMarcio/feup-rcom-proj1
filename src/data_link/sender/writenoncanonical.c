@@ -62,7 +62,7 @@ int send_information_frame(int fd, char* message, int frame_size, int sequence_n
         // sends the frame
         int res = write(fd, message, sizeof(char) * frame_size);
         alarm(TIMEOUT);
-        printf("%d bytes sent in an I frame\n", res);
+        if (OUTPUT) printf("%d bytes sent in an I frame\n", res);
 
         read_receiver_answer(fd, sequence_number);
     }
@@ -86,7 +86,7 @@ int send_disc_frame(int fd, char *disc_frame) {
         // sends the disc
         int res = write(fd, disc_frame, sizeof(char) * 5);
         alarm(TIMEOUT);
-        printf("%d bytes sent in a DISC frame\n", res);
+        if (OUTPUT) printf("%d bytes sent in a DISC frame\n", res);
 
         success = TRUE;
         // receive_disc_frame(fd, TRUE); // TEST
@@ -194,7 +194,7 @@ int connect_to_receiver(int fd, char* set_frame) {
         // sends the set
         int res = write(fd, set_frame, sizeof(char) * 5);
         alarm(TIMEOUT);
-        printf("%d bytes sent in a SET frame\n", res);
+        if (OUTPUT) printf("%d bytes sent in a SET frame\n", res);
 
         read_ua_answer(fd);
     }

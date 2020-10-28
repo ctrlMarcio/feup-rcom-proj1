@@ -82,7 +82,7 @@ void receive_set_frame(int fd) {
 
 void send_rr_frame(char* rr_frame, int fd) {
     int res = write(fd, rr_frame, sizeof(char) * 5);
-    printf("%d bytes sent in a RR frame\n", res);
+    if (OUTPUT) printf("%d bytes sent in a RR frame\n", res);
 }
 
 void send_rej_frame(int fd) {
@@ -90,7 +90,7 @@ void send_rej_frame(int fd) {
     define_rej_frame(rej_frame);
 
     int res = write(fd, rej_frame, sizeof(char) * 5);
-    printf("%d bytes sent in a REJ frame\n", res);
+    if (OUTPUT) printf("%d bytes sent in a REJ frame\n", res);
 }
 
 void define_rr_frame(char* rr_frame) {

@@ -47,7 +47,7 @@ long parse_start_control_packet(char* file_name, char* packet, int packet_size) 
         return LOST_START_PACKET_ERROR;
 
     int l1, l2;
-    char* v1;
+    unsigned char* v1;
     long size = 0;
 
     for (int i = 1; i < packet_size; ++i) {
@@ -57,7 +57,7 @@ long parse_start_control_packet(char* file_name, char* packet, int packet_size) 
         {
         case TYPE_FILE_SIZE:
             l1 = packet[i];
-            v1 = (char*)malloc(sizeof(char) * l1);
+            v1 = (unsigned char*)malloc(sizeof(unsigned char) * l1);
 
             for (int j = 0; j < l1; j++)
                 v1[j] = packet[++i];
@@ -88,11 +88,11 @@ long parse_data_packet(char* packet, int packet_size, char* data) {
     if (packet[0] != CONTROL_DATA)
         return LOST_DATA_PACKET;
 
-    char sequence_number = packet[1]; // FIXME what is this for?
+    // char sequence_number = packet[1]; // FIXME what is this for?
     char l2 = packet[2]; // FIXME what is this for too?
     char l1 = packet[3];
 
-    char l2l1[2] = { l2, l1 };
+    unsigned char l2l1[2] = { l2, l1 };
 
     long size = octets_to_size(l2l1, 2);
 

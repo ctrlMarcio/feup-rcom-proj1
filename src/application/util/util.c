@@ -31,7 +31,7 @@ void size_in_octets(long file_size, char* size_in_octets, unsigned arr_size) {
     }
 }
 
-long octets_to_size(char* octets, int octets_length) {
+long octets_to_size(unsigned char* octets, int octets_length) {
     long size = 0;
     
     for (int i = 0; i < octets_length; ++i) {
