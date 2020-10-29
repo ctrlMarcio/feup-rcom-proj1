@@ -26,7 +26,7 @@ int test_data_link(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
-    char file_name[1024];
+    char file_name[1024];   //TODO: Substituir o literal
     long size = receive_start_control_packet(file_name);
     printf("%s\n", CONNECTION_ESTABLISHED);
 
@@ -53,4 +53,5 @@ int main(int argc, char** argv) {
     printf("%s: %s\n", FILE_RECEIVED, file_name);
 
     // receive end packet
+    receive_end_control_packet(file_name, total_read);  // TODO: tratar dos erros
 }

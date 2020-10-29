@@ -14,8 +14,9 @@
 
 int fd;
 
-long parse_start_control_packet(char* file_name, char* packet, int packet_size);
+long parse_control_packet(char* file_name, char* packet, int packet_size, bool start);
 long parse_data_packet(char* packet, int packet_size, char* data);
+
 
 long receive_start_control_packet(char* file_name) {
     fd = llopen("/dev/ttyS11", 0);      // TODO: replace the literal string
@@ -27,7 +28,7 @@ long receive_start_control_packet(char* file_name) {
     if (read_bytes < 0)
         return LOST_START_PACKET_ERROR;
 
-    return parse_start_control_packet(file_name, buffer, read_bytes);
+    return parse_control_packet(file_name, buffer, read_bytes, TRUE);
 }
 
 // TODO returns the data (information mesmo) size e a data no parametro
@@ -40,11 +41,34 @@ long receive_data_packet(char* data) {
     return parse_data_packet(packet, packet_size, data);
 }
 
+int receive_end_control_packet(char * file_name, long total_read){
+
+    char received_file_name[1024]; // TODO: replace literal
+    char buffer[MAX_FRAME_SIZE];
+    int read_bytes = llread(fd, buffer);
+    if (read_bytes < 0)
+        return LOST_START_PACKET_ERROR;
+
+    long received_total_read = parse_control_packet(received_file_name, buffer, read_bytes, FALSE);
+
+    if (total_read != received_total_read || strcmp(received_file_name, file_name))
+        return LOST_END_PACKET_ERROR;
+
+    return llclose(fd);
+}
+
+
 // PRIVATE FUNCTIONS
 
-long parse_start_control_packet(char* file_name, char* packet, int packet_size) {
-    if (packet[0] != CONTROL_START)
-        return LOST_START_PACKET_ERROR;
+long parse_control_packet(char* file_name, char* packet, int packet_size, bool start) {
+    
+    if(start){ // TODO: muda isto plsplspls
+        if (packet[0] != CONTROL_START)
+            return LOST_START_PACKET_ERROR;
+    }else{
+        if (packet[0] != CONTROL_END)
+            return LOST_START_PACKET_ERROR;
+    }
 
     int l1, l2;
     unsigned char* v1;

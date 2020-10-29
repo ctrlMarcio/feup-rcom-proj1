@@ -64,4 +64,5 @@ int main(int argc, char** argv) {
     printf("%s\n", FILE_SENT);
 
     // end packet
+    send_end_control_packet(size, B, file_name);
 }

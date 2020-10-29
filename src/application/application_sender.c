@@ -16,13 +16,13 @@ int sequence_number = 0;
 int fd;
 
 int get_packet_size(int file_size, enum unit_measure unit, char* file_name);
-void build_control_packet(char* control_packet, int file_size, enum unit_measure unit, char* file_name);
+void build_control_packet(char* control_packet, int file_size, enum unit_measure unit, char* file_name, bool start);
 int build_data_packet(char* data, long data_size, char* buffer);
 
 int send_start_control_packet(int file_size, enum unit_measure unit, char* file_name) {
     int packet_size = get_packet_size(file_size, unit, file_name);
     char control_packet[packet_size];
-    build_control_packet(control_packet, file_size, unit, file_name);
+    build_control_packet(control_packet, file_size, unit, file_name, TRUE);
 
     fd = llopen("/dev/ttyS10", 1);      // TODO:  replace the literal string
     if (fd < 0)
@@ -48,6 +48,20 @@ long send_data_packet(char* data, long data_size) {
     return sent;
 }
 
+int send_end_control_packet(int file_size, enum unit_measure unit, char* file_name){
+    int packet_size = get_packet_size(file_size, unit, file_name);
+    char control_packet[packet_size];
+    build_control_packet(control_packet, file_size, unit, file_name, FALSE);
+
+    int written_bytes = llwrite(fd, control_packet, packet_size);
+    if (written_bytes < 0)
+        return LOST_START_PACKET_ERROR;
+
+    return llclose(fd);
+
+}
+
+
 // PRIVATE FUNCTIONS
 
 int get_packet_size(int file_size, enum unit_measure unit, char* file_name) {
@@ -59,8 +73,13 @@ int get_packet_size(int file_size, enum unit_measure unit, char* file_name) {
     return 5 + l1 + l2;
 }
 
-void build_control_packet(char* control_packet, int file_size, enum unit_measure unit, char* file_name) {
-    char control = CONTROL_START;
+void build_control_packet(char* control_packet, int file_size, enum unit_measure unit, char* file_name, bool start) {
+    char control;
+    if(start)
+        control = CONTROL_START;
+    else
+        control = CONTROL_END;
+    
     char t1 = TYPE_FILE_SIZE;
 
     long bytes = to_bytes(file_size, unit);
