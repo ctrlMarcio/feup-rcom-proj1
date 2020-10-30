@@ -30,14 +30,13 @@ void define_rej_frame(char* rej_frame);
 
 void answer_establishment(int fd) {
     receive_set_frame(fd);
-
     char ua_frame[5];
     define_ua_frame(ua_frame, TRUE);
 
     send_unanswered_frame(fd, ua_frame, 5, "UA");
 }
 
-int answer_information(int fd, char *buffer) {
+int answer_information(int fd, char* buffer) {
     int data_size;
     if ((data_size = receive_data_frame(fd, !answer_sequence_number, buffer)) < 0)
         return LOST_FRAME_ERROR;
@@ -47,7 +46,7 @@ int answer_information(int fd, char *buffer) {
 
     if (send_unanswered_frame(fd, rr_frame, 5, "RR"))
         return LOST_FRAME_ERROR;
-    
+
     answer_sequence_number = 1 - answer_sequence_number; // alternate between 0 and 1
     return data_size;
 }
@@ -73,7 +72,6 @@ void receive_set_frame(int fd) {
         int res = read(fd, buf, 1);
         if (res < 0)
             continue;
-
         request_frame[i] = buf[0];
         update_state(&state, request_frame[i], set);
         i++;

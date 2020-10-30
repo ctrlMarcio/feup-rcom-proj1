@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "application_packet.h"
-#include "util/protocol.h"
+#include "util/application.h"
 #include "util/util.h"
 #include "../util/util.h"
 #include "../data_link/data_link.h"
@@ -17,8 +17,12 @@ int fd;
 long parse_start_control_packet(char* file_name, char* packet, int packet_size);
 long parse_data_packet(char* packet, int packet_size, char* data);
 
-long receive_start_control_packet(char* file_name) {
-    fd = llopen("/dev/ttyS11", 0);      // TODO: replace the literal string
+long receive_start_control_packet(char* file_name, bool virtual) {
+    if (virtual)
+        fd = llopen(VIRTUAL_RECEIVER_PORT, 0);
+    else
+        fd = llopen(DEFAULT_PORT, 0);
+
     if (fd < 0)
         return CONFIG_PORT_ERROR;
 
@@ -36,7 +40,6 @@ long receive_data_packet(char* data) {
     int packet_size = llread(fd, packet);
     if (packet_size < 0)
         return LOST_START_PACKET_ERROR;
-
     return parse_data_packet(packet, packet_size, data);
 }
 

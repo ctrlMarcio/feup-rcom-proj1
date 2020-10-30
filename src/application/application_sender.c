@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "application_packet.h"
-#include "util/protocol.h"
+#include "util/application.h"
 #include "util/util.h"
 #include "../util/util.h"
 #include "../data_link/data_link.h"
@@ -19,12 +19,15 @@ int get_packet_size(int file_size, enum unit_measure unit, char* file_name);
 void build_control_packet(char* control_packet, int file_size, enum unit_measure unit, char* file_name);
 int build_data_packet(char* data, long data_size, char* buffer);
 
-int send_start_control_packet(int file_size, enum unit_measure unit, char* file_name) {
+int send_start_control_packet(int file_size, enum unit_measure unit, char* file_name, bool virtual) {
     int packet_size = get_packet_size(file_size, unit, file_name);
     char control_packet[packet_size];
     build_control_packet(control_packet, file_size, unit, file_name);
 
-    fd = llopen("/dev/ttyS10", 1);      // TODO:  replace the literal string
+    if (virtual)
+        fd = llopen(VIRTUAL_SENDER_PORT, 1);    
+    else
+        fd = llopen(DEFAULT_PORT, 1);        
     if (fd < 0)
         return CONFIG_PORT_ERROR;
 

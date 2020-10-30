@@ -6,15 +6,41 @@
 
 #include "../data_link/util/serial_port.h"
 #include "../error/error.h"
+#include "../application/util/application.h"
 
-int check_arguments(int argc, char** argv) {
-    // TODO accept ttys0 ttys1
-    if ((argc < 2) || ((strcmp("/dev/ttyS10", argv[1]) != 0) && (strcmp("/dev/ttyS11", argv[1]) != 0))) {
-        printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
+int check_sender_arguments(int argc, char** argv, char** filename) {
+    if (argc != 2 && argc != 3)
         return ARGS_ERROR;
+
+    bool virtual = FALSE;
+    if (argc == 3) {
+        if (!strcmp(argv[1], VIRTUAL_PORTS_FLAG) || !strcmp(argv[1], VIRTUAL_PORTS_EXTENDED_FLAG))
+            *filename = argv[2];
+        else if (!strcmp(argv[2], VIRTUAL_PORTS_FLAG) || !strcmp(argv[2], VIRTUAL_PORTS_EXTENDED_FLAG))
+            *filename = argv[1];
+        else
+            return ARGS_ERROR;
+        virtual = TRUE;
+    }
+    else {
+        *filename = argv[1];
     }
 
-    return 0;
+    return virtual;
+}
+
+int check_receiver_arguments(int argc, char** argv) {
+    if (argc > 2)
+        return ARGS_ERROR;
+    bool virtual = FALSE;
+    if (argc == 2) {
+        if (!strcmp(argv[1], VIRTUAL_PORTS_FLAG) || !strcmp(argv[1], VIRTUAL_PORTS_EXTENDED_FLAG))
+            virtual = TRUE;
+        else
+            return ARGS_ERROR;
+    }
+
+    return virtual;
 }
 
 unsigned char xor_array(int data_size, char* data) {
@@ -55,7 +81,7 @@ int append_array(char* original, int size, char* to_append, int to_append_size) 
     return size + i;
 }
 
-long get_file_size(char *file_name) {
+long get_file_size(char* file_name) {
     struct stat st;
     long size;
     stat(file_name, &st);

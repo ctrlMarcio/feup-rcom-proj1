@@ -7,27 +7,17 @@
 #include "util/util.h"
 #include "application/application_receiver.h"
 #include "application/util/util.h"
-#include "application/util/io.h"
-
-int test_data_link(int argc, char** argv) {
-    int res;
-    if ((res = check_arguments(argc, argv)))
-        return res;
-
-    int fd = llopen(argv[1], FALSE);
-
-    char asdlfkmsdalkfmasdf[MAX_FRAME_SIZE];
-    llread(fd, asdlfkmsdalkfmasdf);
-
-    char sakdfjnaskdjasd[MAX_FRAME_SIZE];
-    llread(fd, sakdfjnaskdjasd);
-
-    return llclose(fd);
-}
+#include "application/util/application.h"
+#include "error/error.h"
 
 int main(int argc, char** argv) {
+    // TODO message errors
+    int virtual; // boolean or negative (error)
+    if ((virtual = check_receiver_arguments(argc, argv)) < 0)
+        return ARGS_ERROR;
+
     char file_name[1024];
-    long size = receive_start_control_packet(file_name);
+    long size = receive_start_control_packet(file_name, virtual);
     printf("%s\n", CONNECTION_ESTABLISHED);
 
     FILE* file = fopen(file_name, "w");

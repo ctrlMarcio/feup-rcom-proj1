@@ -28,15 +28,9 @@
 
 #define ESCAPE 0x7d
 
-/**
- * @brief Checks the arguments of the programs, taking into account that each one receives no more than the port to
- * connect to each other.
- * 
- * @param argc  the number of the arguments
- * @param argv  the array of arguments
- * @return int  the error code or 0 if successful
- */
-int check_arguments(int argc, char **argv);
+int check_sender_arguments(int argc, char **argv, char **filename);
+
+int check_receiver_arguments(int argc, char **argv);
 
 /**
  * @brief 
