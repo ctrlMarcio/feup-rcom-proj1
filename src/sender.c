@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     char *filename = argv[0]; // placeholder
     if ((virtual = check_sender_arguments(argc, argv, &filename)) < 0)
         return ARGS_ERROR;
-        
+
     printf("%s\n", filename);
 
     // verify size
@@ -47,4 +47,5 @@ int main(int argc, char** argv) {
     printf("%s\n", FILE_SENT);
 
     // end packet
+    send_end_control_packet(size, B, filename);
 }

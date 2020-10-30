@@ -43,4 +43,5 @@ int main(int argc, char** argv) {
     printf("%s: %s\n", FILE_RECEIVED, file_name);
 
     // receive end packet
+    receive_end_control_packet(file_name, total_read);  // TODO: tratar dos erros
 }
