@@ -9,6 +9,7 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "../util/util.h"
 #include "../error/error.h"
 #include "receiver/readnoncanonical.h"
 #include "sender/writenoncanonical.h"
@@ -19,7 +20,7 @@
 
 struct termios oldtio;
 char write_sequence_number = 0;
-bool entity; // TODO replace with enum (rn true means sender, false means receiver)
+enum entity entity;
 
 int open_serial_port(char* port);
 void define_disc_frame(char* disc_frame, bool sender_to_receiver);
@@ -27,21 +28,20 @@ int close_sender(int fd);
 int close_receiver(int fd);
 void receive_disc_frame(int fd, bool sender);
 
-int llopen(char* port, bool sender) {
+int llopen(char* port, enum entity open_entity) {
     int fd = open_serial_port(port);
     if (fd < 0)
         return CONFIG_PORT_ERROR;
 
-    if (sender) {
+    entity = open_entity;
+
+    if (open_entity) {
         if (attempt_establishment(fd))
             return ESTABLISH_CONNECTION_ERROR;
-        entity = TRUE;
     }
     else {
         answer_establishment(fd);
-        entity = FALSE;
     }
-
     return fd;
 }
 
@@ -59,7 +59,7 @@ int llwrite(int fd, char* buffer, int length) {
     define_message_frame(message, new_data, length, write_sequence_number);
 
     // send the information frame
-    int sent_error = send_retransmission_frame(fd, message, length + 6, "I", RR, TRUE, write_sequence_number);
+    int sent_error = send_information_frame(fd, message, length + 6, write_sequence_number);
     if (sent_error)
         return LOST_FRAME_ERROR;
 
@@ -76,7 +76,7 @@ int llread(int fd, char* buffer) {
 }
 
 int llclose(int fd) {
-    if (entity)
+    if (entity == SENDER)
         return close_sender(fd);
     else
         return close_receiver(fd);
@@ -124,7 +124,7 @@ int close_sender(int fd) {
     char disc_frame[5];
     define_disc_frame(disc_frame, TRUE);
 
-    if (send_retransmission_frame(fd, disc_frame, 5, "DISC", DISC, TRUE, 0)) // TODO sequence number not required
+    if (send_retransmission_frame(fd, disc_frame, 5, "DISC", DISC, TRUE))
         return CLOSE_CONNECTION_ERROR;
 
     char ua_frame[5];
@@ -137,13 +137,13 @@ int close_sender(int fd) {
 }
 
 int close_receiver(int fd) {
-    if (receive_frame(fd, 5, DISC, TRUE, 0, FALSE)) // TODO sequence number not required
+    if (receive_frame(fd, 5, DISC, TRUE, FALSE))
         return CLOSE_CONNECTION_ERROR;
 
     char disc_frame[5];
     define_disc_frame(disc_frame, FALSE);
 
-    if (send_retransmission_frame(fd, disc_frame, 5, "DISC", UA, FALSE, 1)) // TODO sequence number not required
+    if (send_retransmission_frame(fd, disc_frame, 5, "DISC", UA, FALSE))
         return CLOSE_CONNECTION_ERROR;
 
     return terminate_sender_connection(fd, &oldtio);

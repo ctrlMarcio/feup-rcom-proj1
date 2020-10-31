@@ -89,3 +89,22 @@ long get_file_size(char* file_name) {
 
     return size;
 }
+
+bool replace_file(char *filename) {
+    //ask the user to replace file or skip
+    printf("The following file %s already exists in the destination folder. Do you wish to replace the existing file? (Y/N) ", filename);
+
+    //gets input
+    char answer[MAX_USER_INPUT_SIZE];
+    fgets(answer, MAX_USER_INPUT_SIZE, stdin);
+
+    answer[strlen(answer) - 1] = '\0';
+
+    if ( strcmp(answer,"Y") == 0 || strcmp(answer, "YES") == 0 || strcmp(answer,"y") == 0 || strcmp(answer,"yes") == 0 || strcmp(answer, "s") == 0 || strcmp(answer, "sim") == 0 || strcmp(answer, "S") == 0 || strcmp(answer, "SIM") == 0 || strcmp(answer ,"sim senhora minha cara colega sim sim sim") == 0)
+        return TRUE;
+    
+    if ( strcmp(answer, "N") == 0 || strcmp(answer, "NO") == 0 || strcmp(answer, "n") == 0 || strcmp(answer, "no") == 0 || strcmp(answer, "não") == 0 || strcmp(answer, "NÃO") == 0 || strcmp(answer, "não sua cara de cu, trabalha não é para isto que te pago") == 0) //TODO: fix this or meme this idc
+        return FALSE;
+    
+    return TRUE;
+}

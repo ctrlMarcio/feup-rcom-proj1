@@ -29,7 +29,7 @@ int attempt_establishment(int fd) {
     char set_frame[5];
     define_set_frame(set_frame);
 
-    return send_retransmission_frame(fd, set_frame, 5, "SET", UA, TRUE, 0); // TODO dont need for sequence number
+    return send_retransmission_frame(fd, set_frame, 5, "SET", UA, TRUE);
 }
 
 int define_message_frame(char* message, char* data, int data_size, int sequence_number) {
@@ -89,7 +89,6 @@ int send_disc_frame(int fd, char *disc_frame) {
         if (OUTPUT) printf("%d bytes sent in a DISC frame\n", res);
 
         success = TRUE;
-        // receive_disc_frame(fd, TRUE); // TEST
     }
 
     return !success;

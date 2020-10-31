@@ -11,37 +11,78 @@
 #include "error/error.h"
 
 int main(int argc, char** argv) {
-    // TODO message errors
     int virtual; // boolean or negative (error)
-    if ((virtual = check_receiver_arguments(argc, argv)) < 0)
+    if ((virtual = check_receiver_arguments(argc, argv)) < 0) {
+        print_error_message(ARGS_ERROR, argv[0]);
         return ARGS_ERROR;
+    }
 
-    char file_name[1024];
-    long size = receive_start_control_packet(file_name, virtual);
+    char filename[MAX_FILE_NAME_SIZE];
+    long size;
+    if ((size = receive_start_control_packet(filename, virtual)) < 0)
+        return size;
+
+
     printf("%s\n", CONNECTION_ESTABLISHED);
 
-    FILE* file = fopen(file_name, "w");
 
-    // TODO do something if file exists
+    // verifies if the user wants to replace the file or skip
+    bool replace = TRUE;
+    if (access(filename, F_OK) != -1) {
+        replace = replace_file(filename);
+    }
+
+    if (!replace) {
+        print_error_message(EXISTING_FILE_ERROR, filename);
+        // TODO: send frame to other side so sender finishes
+
+        return EXISTING_FILE_ERROR;
+    }
+
+    //open file
+    FILE* file = fopen(filename, "w");
+    if (!file) {
+        perror(filename);
+        print_error_message(FILE_ERROR, filename);
+        return FILE_ERROR;
+    }
 
     // initializes the total bytes read
     long total_read = 0;
 
     char data[MAX_PACKET_SIZE];
-    printf("0%%");
+    int progress = 0;
+    float percentage;
+    long bytes_read;
     while (total_read < size) {
-        long bytes_read = receive_data_packet(data);
+        bytes_read = receive_data_packet(data);
         fwrite(data, sizeof(char), bytes_read, file);
 
         total_read += bytes_read;
-        printf("\r   \r%.2f%%", (float) total_read / (float) size * 100);
+
+        percentage = (float)total_read / (float)size * 100;
+        progress = percentage / 5;
+
+        if ((int) (percentage * 1000) % 2)
+            printf("\e[?25l\r    \r%.1f%% [%.*s%.*s]", percentage, progress, "####################", 20 - progress, "                     ");
     }
-    printf("\n");
-    
+    printf("\e[?25l\r    \r%.1f%% [%.*s%.*s]\n", percentage, progress, "####################", 20 - progress, "                     ");
+
     //close file
-    fclose(file);
-    printf("%s: %s\n", FILE_RECEIVED, file_name);
+    int error;
+    if ((error = fclose(file) < 0)) {
+        perror(filename);
+        print_error(FILE_ERROR);
+        return FILE_ERROR;
+    }
+
+    printf("%s: %s\n", FILE_RECEIVED, filename);
 
     // receive end packet
-    receive_end_control_packet(file_name, total_read);  // TODO: tratar dos erros
+    if ((error = receive_end_control_packet(filename, total_read)) < 0) {
+        print_error(error);
+        return error;
+    }
+
+    return 0;
 }

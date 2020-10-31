@@ -28,6 +28,11 @@
 
 #define ESCAPE 0x7d
 
+enum entity {
+    SENDER,
+    RECEIVER
+};
+
 int check_sender_arguments(int argc, char **argv, char **filename);
 
 int check_receiver_arguments(int argc, char **argv);
@@ -71,4 +76,10 @@ int append_array(char *original, int size, char* to_append, int to_append_size);
  * @param file_name     the name of the file
  * @return long         the size of the file
  */
-long get_file_size(char *file_name);
+long get_file_size(char *filename);
+
+/**
+ * 
+ * 
+ */
+bool replace_file(char *filename);

@@ -13,7 +13,7 @@
  * @param port 
  * @return int 
  */
-int llopen(char *port, bool sender); // TODO replace bool with enum
+int llopen(char *port, enum entity entity);
 
 int llwrite(int fd, char *buffer, int length);
 

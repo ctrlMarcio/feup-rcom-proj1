@@ -17,7 +17,7 @@ COMMON_SRC = ${SRC_DIR}/data_link/data_link.c ${SRC_DIR}/data_link/sender/writen
 			${SRC_DIR}/data_link/receiver/readnoncanonical.c ${SRC_DIR}/util/util.c \
 			${SRC_DIR}/data_link/util/state_machine.c ${SRC_DIR}/data_link/common.c \
 			${SRC_DIR}/data_link/util/serial_port.c ${SRC_DIR}/application/application_receiver.c ${SRC_DIR}/application/util/util.c \
-			${SRC_DIR}/application/application_sender.c 
+			${SRC_DIR}/application/application_sender.c ${SRC_DIR}/error/error.c 
 SENDER_SRC = ${SRC_DIR}/sender.c ${COMMON_SRC}
 RECEIVER_SRC = ${SRC_DIR}/receiver.c ${COMMON_SRC}
 SRC_FILES = ${SENDER_SRC} ${RECEIVER_SRC}

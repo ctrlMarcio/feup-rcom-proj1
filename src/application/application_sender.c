@@ -24,16 +24,25 @@ int send_start_control_packet(int file_size, enum unit_measure unit, char* file_
     char control_packet[packet_size];
     build_control_packet(control_packet, file_size, unit, file_name, TRUE);
 
+    char *port;
+
     if (virtual)
-        fd = llopen(VIRTUAL_SENDER_PORT, 1);    
+        port = VIRTUAL_SENDER_PORT;
     else
-        fd = llopen(DEFAULT_PORT, 1);        
-    if (fd < 0)
+        port = DEFAULT_PORT;
+    
+    fd = llopen(port, SENDER);
+
+    if (fd < 0) {
+        print_error_message(CONFIG_PORT_ERROR, port);
         return CONFIG_PORT_ERROR;
+    }
 
     int written_bytes = llwrite(fd, control_packet, packet_size);
-    if (written_bytes < 0)
+    if (written_bytes < 0) {
+        print_error(LOST_START_PACKET_ERROR);
         return LOST_START_PACKET_ERROR;
+    }
 
     return written_bytes;
 }
@@ -51,7 +60,7 @@ long send_data_packet(char* data, long data_size) {
     return sent;
 }
 
-int send_end_control_packet(int file_size, enum unit_measure unit, char* file_name){
+int send_end_control_packet(int file_size, enum unit_measure unit, char* file_name) {
     int packet_size = get_packet_size(file_size, unit, file_name);
     char control_packet[packet_size];
     build_control_packet(control_packet, file_size, unit, file_name, FALSE);
@@ -78,11 +87,11 @@ int get_packet_size(int file_size, enum unit_measure unit, char* file_name) {
 
 void build_control_packet(char* control_packet, int file_size, enum unit_measure unit, char* file_name, bool start) {
     char control;
-    if(start)
+    if (start)
         control = CONTROL_START;
     else
         control = CONTROL_END;
-    
+
     char t1 = TYPE_FILE_SIZE;
 
     long bytes = to_bytes(file_size, unit);

@@ -18,23 +18,30 @@ long parse_control_packet(char* file_name, char* packet, int packet_size, bool s
 long parse_data_packet(char* packet, int packet_size, char* data);
 
 long receive_start_control_packet(char* file_name, bool virtual) {
-    if (virtual)
-        fd = llopen(VIRTUAL_RECEIVER_PORT, 0);
-    else
-        fd = llopen(DEFAULT_PORT, 0);
+    char *port;
 
-    if (fd < 0)
+    if (virtual)
+        port = VIRTUAL_RECEIVER_PORT;
+    else
+        port = DEFAULT_PORT;
+
+    fd = llopen(port, RECEIVER);
+    
+    if (fd < 0) {
+        print_error_message(CONFIG_PORT_ERROR, port);
         return CONFIG_PORT_ERROR;
+    }
 
     char buffer[MAX_FRAME_SIZE];
     int read_bytes = llread(fd, buffer);
-    if (read_bytes < 0)
+    if (read_bytes < 0) {
+        print_error(LOST_START_PACKET_ERROR);
         return LOST_START_PACKET_ERROR;
+    }
 
     return parse_control_packet(file_name, buffer, read_bytes, TRUE);
 }
 
-// TODO returns the data (information mesmo) size e a data no parametro
 long receive_data_packet(char* data) {
     char packet[MAX_PACKET_SIZE];
     int packet_size = llread(fd, packet);
@@ -45,7 +52,7 @@ long receive_data_packet(char* data) {
 
 int receive_end_control_packet(char * file_name, long total_read){
 
-    char received_file_name[1024]; // TODO: replace literal
+    char received_file_name[MAX_FILE_NAME_SIZE];
     char buffer[MAX_FRAME_SIZE];
     int read_bytes = llread(fd, buffer);
     if (read_bytes < 0)
@@ -112,7 +119,7 @@ long parse_control_packet(char* file_name, char* packet, int packet_size, bool s
 
 long parse_data_packet(char* packet, int packet_size, char* data) {
     if (packet[0] != CONTROL_DATA)
-        return LOST_DATA_PACKET;
+        return LOST_DATA_PACKET_ERROR;
 
     // char sequence_number = packet[1]; // FIXME what is this for?
     char l2 = packet[2]; // FIXME what is this for too?
@@ -127,7 +134,7 @@ long parse_data_packet(char* packet, int packet_size, char* data) {
         data[i] = packet[i + 4];
 
     if (size != i)
-         return LOST_DATA_PACKET;
+         return LOST_DATA_PACKET_ERROR;
 
     return i;
 }

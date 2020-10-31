@@ -12,15 +12,7 @@ int count, success;
 void define_rej_frame(char* rej_frame, int sequence_number);
 int parse_data(int data_size, char* data_array, int fd, int i, char* frame, int sequence_number, char* buffer);
 
-
-int send_frame(int fd, char* frame, unsigned frame_size, char* type, bool retransmission, enum frame answer_type, bool sender_to_receiver, int sequence_number) {
-    if (retransmission)
-        return send_retransmission_frame(fd, frame, frame_size, type, answer_type, sender_to_receiver, sequence_number);
-    else
-        return send_unanswered_frame(fd, frame, frame_size, type);
-}
-
-int send_retransmission_frame(int fd, char* frame, unsigned frame_size, char* type, enum frame answer_type, bool sender_to_receiver, int sequence_number) {
+int send_retransmission_frame(int fd, char* frame, unsigned frame_size, char* type, enum frame answer_type, bool sender_to_receiver) {
     (void)signal(SIGALRM, alarm_handler);
     count = 0, success = 0;
 
@@ -33,11 +25,9 @@ int send_retransmission_frame(int fd, char* frame, unsigned frame_size, char* ty
         if (OUTPUT) printf("%d bytes sent in a %s frame\n", res, type);
 
         if (answer_type == UA)
-            receive_frame(fd, 5, UA, sender_to_receiver, !sequence_number, FALSE);
-        else if (answer_type == RR)
-            receive_frame(fd, 5, RR, sender_to_receiver, !sequence_number, TRUE);
+            receive_frame(fd, 5, UA, sender_to_receiver, FALSE);
         else if (answer_type == DISC)
-            receive_frame(fd, 5, DISC, !sender_to_receiver, !sequence_number, FALSE); // !sender_to_receiver bc DISC is not an answer, is a new request
+            receive_frame(fd, 5, DISC, !sender_to_receiver, FALSE); // !sender_to_receiver bc DISC is not an answer, is a new request
     }
 
     return !success;
@@ -52,9 +42,9 @@ int send_unanswered_frame(int fd, char* frame, unsigned frame_size, char* type) 
     return 0;
 }
 
-int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_receiver, int sequence_number, bool expect_rej) {
+int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_receiver, bool expect_rej) {
     if (frame_type == I) // compatibility ig
-        return 1; // FIXME
+        return 1;
 
     success = 1;
 
@@ -64,13 +54,13 @@ int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_r
         address = ADDRESS_SENDER_RECEIVER;
     else
         address = ADDRESS_RECEIVER_SENDER;
-    char control = get_control(frame_type, sequence_number);
+    char control = get_control(frame_type, 0);
     bool data = (frame_type == I);
     MessageConstruct construct = { .address = address, .control = control, .data = data };
     enum set_state state = START;
 
     // define REJ message construct in case REJ frame is waited
-    control = get_control(REJ, sequence_number);
+    control = get_control(REJ, 0);
     MessageConstruct rej = { .address = ADDRESS_RECEIVER_SENDER, .control = control, .data = FALSE };
     enum set_state rej_state = START;
 

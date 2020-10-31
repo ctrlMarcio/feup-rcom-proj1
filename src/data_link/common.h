@@ -13,17 +13,10 @@
  */
 #define NR_ATTEMPTS 3
 
-//TODO document functions
-
 /**
  *
  */
-int send_frame(int fd, char* frame, unsigned frame_size, char* type, bool retransmission, enum frame answer_type, bool sender_to_receiver, int sequence_number);
-
-/**
- *
- */
-int send_retransmission_frame(int fd, char* frame, unsigned frame_size, char* type, enum frame answer_type, bool sender_to_receiver, int sequence_number);
+int send_retransmission_frame(int fd, char* frame, unsigned frame_size, char* type, enum frame answer_type, bool sender_to_receiver);
 
 /**
  *
@@ -33,7 +26,7 @@ int send_unanswered_frame(int fd, char* frame, unsigned frame_size, char* type);
 /**
  *
  */
-int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_receiver, int sequence_number, bool expect_rej);
+int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_receiver, bool expect_rej);
 
 /**
  * 
