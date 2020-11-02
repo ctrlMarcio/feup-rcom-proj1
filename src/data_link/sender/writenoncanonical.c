@@ -59,6 +59,11 @@ int send_information_frame(int fd, char* message, int frame_size, int sequence_n
         if (success)
             break;
 
+        // TEST
+        // for (int i = 0; i < frame_size; ++i)
+        //     printf("%x ", message[i]);
+        // printf("\nFIM\n");
+
         // sends the frame
         int res = write(fd, message, sizeof(char) * frame_size);
         alarm(TIMEOUT);

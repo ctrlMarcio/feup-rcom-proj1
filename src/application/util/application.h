@@ -30,8 +30,8 @@
 
 /* Size constants */
 
-#define DATA_SIZE           4096 // in bytes
+#define DATA_SIZE           512 // in bytes
 
 #define MAX_FILE_NAME_SIZE  1024 // in bytes
 
-#define MAX_USER_INPUT_SIZE     1024 
+#define MAX_USER_INPUT_SIZE 1024 

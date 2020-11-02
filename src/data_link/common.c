@@ -118,10 +118,13 @@ int receive_data_frame(int fd, int sequence_number, char* buffer) {
         int res = read(fd, buf, 1);
         if (res <= 0) continue;
 
+        // printf("%x ", buf[0]); // TEST
+
         // destuffing
         if (buf[0] == ESCAPE) {
             // reads the next character and saves it promptly without updating the state machine
-            read(fd, buf, 1);
+            while ((res = read(fd, buf, 1)) <= 0);
+            // printf("%x ", buf[0]); // TEST
             frame[i] = XOR(buf[0], STUFF_FLAG);
 
             i++;
@@ -145,13 +148,14 @@ int receive_data_frame(int fd, int sequence_number, char* buffer) {
                 frame[i] = buf[0];
             }
 
-            alarm(0);
             break;
         }
         // updates the answer frame
         frame[i] = buf[0];
         i++;
     }
+
+    // printf("\nFIM\n"); // TEST
 
     return data_size;
 }
@@ -164,9 +168,9 @@ int parse_data(int data_size, char* data_array, int fd, int i, char* frame, int 
         char rej_frame[5];
         define_rej_frame(rej_frame, !sequence_number);
 
-        if (send_unanswered_frame(fd, rej_frame, 5, "REJ"))
-            return LOST_FRAME_ERROR;
-        return receive_data_frame(fd, sequence_number, buffer);
+        send_unanswered_frame(fd, rej_frame, 5, "REJ");
+        return LOST_FRAME_ERROR;
+        // return receive_data_frame(fd, sequence_number, buffer);
     }
 
     return data_size;

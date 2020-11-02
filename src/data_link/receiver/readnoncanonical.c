@@ -38,8 +38,7 @@ void answer_establishment(int fd) {
 
 int answer_information(int fd, char* buffer) {
     int data_size;
-    if ((data_size = receive_data_frame(fd, !answer_sequence_number, buffer)) < 0)
-        return LOST_FRAME_ERROR;
+    while ((data_size = receive_data_frame(fd, !answer_sequence_number, buffer)) < 0);
 
     char rr_frame[5];
     define_rr_frame(rr_frame);

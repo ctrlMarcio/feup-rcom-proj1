@@ -35,7 +35,7 @@ int llopen(char* port, enum entity open_entity) {
 
     entity = open_entity;
 
-    if (open_entity) {
+    if (open_entity == SENDER) {
         if (attempt_establishment(fd))
             return ESTABLISH_CONNECTION_ERROR;
     }
@@ -59,7 +59,7 @@ int llwrite(int fd, char* buffer, int length) {
     define_message_frame(message, new_data, length, write_sequence_number);
 
     // send the information frame
-    int sent_error = send_information_frame(fd, message, length + 6, write_sequence_number);
+    int sent_error = send_information_frame(fd, message, length + 5, write_sequence_number);
     if (sent_error)
         return LOST_FRAME_ERROR;
 
