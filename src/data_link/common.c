@@ -3,10 +3,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <signal.h>
-
+#include <time.h>
+#include <stdlib.h>
 
 #include "util/state_machine.h"
 #include "../error/error.h"
+
 int count, success;
 
 void define_rej_frame(char* rej_frame, int sequence_number);
@@ -117,6 +119,12 @@ int receive_data_frame(int fd, int sequence_number, char* buffer) {
         // read from the port
         int res = read(fd, buf, 1);
         if (res <= 0) continue;
+
+        // int percentage = rand() % 1024; // TEST random errors
+        // if (percentage == 19) {
+        //     buf[0] = 0x00;
+        //     // printf("Bit lost!\n");
+        // }
 
         // printf("%x ", buf[0]); // TEST
 

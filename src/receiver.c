@@ -1,6 +1,8 @@
 #include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
 
 #include "data_link/data_link.h"
 #include "data_link/receiver/readnoncanonical.h"
@@ -11,6 +13,8 @@
 #include "error/error.h"
 
 int main(int argc, char** argv) {
+    srand(time(0)); // TEST
+
     int virtual; // boolean or negative (error)
     if ((virtual = check_receiver_arguments(argc, argv)) < 0) {
         print_error_message(ARGS_ERROR, argv[0]);
@@ -39,7 +43,7 @@ int main(int argc, char** argv) {
         return EXISTING_FILE_ERROR;
     }
 
-    //open file
+    // open file
     FILE* file = fopen(filename, "w");
     if (!file) {
         perror(filename);
@@ -47,12 +51,12 @@ int main(int argc, char** argv) {
         return FILE_ERROR;
     }
 
+    clock_t start = clock();
+
     // initializes the total bytes read
     long total_read = 0;
 
     char data[MAX_PACKET_SIZE];
-    int progress = 0;
-    float percentage;
     long bytes_read;
     while (total_read < size) {
         bytes_read = receive_data_packet(data);
@@ -60,15 +64,13 @@ int main(int argc, char** argv) {
 
         total_read += bytes_read;
 
-        percentage = (float)total_read / (float)size * 100;
-        progress = percentage / 5;
-
-        if ((int) (percentage * 1000) % 2)
-            printf("\e[?25l\r    \r%.1f%% [%.*s%.*s]", percentage, progress, "####################", 20 - progress, "                     ");
+        print_progess(total_read, size, start);
     }
-    printf("\e[?25l\r    \r%.1f%% [%.*s%.*s]\n", percentage, progress, "####################", 20 - progress, "                     ");
 
-    //close file
+    print_progess(size, size, start);
+    printf("\n");
+
+    // close file
     int error;
     if ((error = fclose(file) < 0)) {
         perror(filename);

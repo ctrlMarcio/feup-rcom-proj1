@@ -1,6 +1,6 @@
 #pragma once
 
-enum unit_measure {B, KB, MB, GB}; // #werecool 💩
+enum unit_measure {B, KB, MB, GB};
 
 long to_bytes(int amount, enum unit_measure unit);
 

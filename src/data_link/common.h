@@ -11,7 +11,7 @@
 /**
  * @brief Defines the number of attempts per message sent.
  */
-#define NR_ATTEMPTS 3
+#define NR_ATTEMPTS 5
 
 /**
  *

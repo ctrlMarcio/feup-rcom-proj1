@@ -108,3 +108,62 @@ bool replace_file(char *filename) {
     
     return TRUE;
 }
+
+void print_progess(int total_read, int size, clock_t start) {
+    float percentage = (float)total_read / (float)size * 100;
+    int progress = percentage / 5;
+
+    if ((int)(percentage * 1000) % 2 || percentage == 100) {
+        clock_t end = clock();
+        float elapsed = (float)(end - start) / CLOCKS_PER_SEC;
+
+        // TODO use struct "size"
+        char* type = "B";
+        float read = (float)total_read;
+
+        if (read > 1024) {
+            type = "KB";
+            read /= 1024;
+        }
+        if (read > 1024) {
+            type = "MB";
+            read /= 1024;
+        }
+        if (read > 1024) {
+            type = "GB";
+            read /= 1024;
+        }
+
+        // TODO use function/struct
+        char* time = "s";
+        float remaining = 100 * elapsed / percentage - elapsed;
+
+        if (remaining > 60) {
+            time = "min";
+            remaining /= 60;
+        }
+        if (remaining > 60) {
+            time = "h";
+            remaining /= 60;
+        }
+
+        // TODO use function/struct
+        char* speed_type = "B/s";
+        float speed = (float) total_read / elapsed;
+
+        if (speed > 1024) {
+            speed_type = "KB/s";
+            speed /= 1024;
+        }
+        if (speed > 1024) {
+            speed_type = "MB/s";
+            speed /= 1024;
+        }
+        if (speed > 1024) {
+            speed_type = "GB/s";
+            speed /= 1024;
+        }
+
+        printf("\e[?25l\r%.1f%% [%.*s%.*s]    %0.2fs elapsed    %0.2f %s    %0.2f %s    %0.2f%s remaining%.*s", percentage, progress, "####################", 20 - progress, "                     ", elapsed, read, type, speed, speed_type, remaining, time, 10, "                     ");
+    }
+}

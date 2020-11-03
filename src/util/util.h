@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include <time.h>
+#include <stdio.h>
+
 /**
  * @brief Calculates a bitwise XOR between two numbers.
  */
@@ -83,3 +86,5 @@ long get_file_size(char *filename);
  * 
  */
 bool replace_file(char *filename);
+
+void print_progess(int total_read, int size, clock_t start);
