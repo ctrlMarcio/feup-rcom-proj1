@@ -8,7 +8,6 @@
 #include "data_link/receiver/readnoncanonical.h"
 #include "util/util.h"
 #include "application/application_receiver.h"
-#include "application/util/util.h"
 #include "application/util/application.h"
 #include "error/error.h"
 
@@ -17,8 +16,8 @@ int main(int argc, char** argv) {
 
     int virtual; // boolean or negative (error)
     if ((virtual = check_receiver_arguments(argc, argv)) < 0) {
-        print_error_message(ARGS_ERROR, argv[0]);
-        return ARGS_ERROR;
+        print_error_message(RECEIVER_ARGS_ERROR, argv[0]);
+        return RECEIVER_ARGS_ERROR;
     }
 
     char filename[MAX_FILE_NAME_SIZE];
@@ -26,9 +25,7 @@ int main(int argc, char** argv) {
     if ((size = receive_start_control_packet(filename, virtual)) < 0)
         return size;
 
-
     printf("%s\n", CONNECTION_ESTABLISHED);
-
 
     // verifies if the user wants to replace the file or skip
     bool replace = TRUE;

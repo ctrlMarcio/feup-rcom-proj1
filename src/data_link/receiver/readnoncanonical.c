@@ -37,9 +37,21 @@ void answer_establishment(int fd) {
 }
 
 int answer_information(int fd, char* buffer) {
+    // doesn't stop reading until a good read
     int data_size;
-    while ((data_size = receive_data_frame(fd, !answer_sequence_number, buffer)) < 0);
+    do {
+        data_size = receive_data_frame(fd, !answer_sequence_number, buffer);
+        
+        if (data_size == REPEATED_FRAME_ERROR) {
+            // defines and sends the RR
+            char rr_frame[5];
+            define_rr_frame(rr_frame);
 
+            send_unanswered_frame(fd, rr_frame, 5, "RR");
+        }
+    } while (data_size < 0);
+
+    // defines and sends the RR
     char rr_frame[5];
     define_rr_frame(rr_frame);
 

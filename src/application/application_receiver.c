@@ -6,7 +6,6 @@
 
 #include "application_packet.h"
 #include "util/application.h"
-#include "util/util.h"
 #include "../util/util.h"
 #include "../data_link/data_link.h"
 #include "../data_link/util/serial_port.h"

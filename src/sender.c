@@ -15,8 +15,8 @@ int main(int argc, char** argv) {
     int virtual; // boolean or error
     char* filename = argv[0]; // placeholder
     if ((virtual = check_sender_arguments(argc, argv, &filename)) < 0) {
-        print_error_message(ARGS_ERROR, argv[0]);
-        return ARGS_ERROR;
+        print_error_message(SENDER_ARGS_ERROR, argv[0]);
+        return SENDER_ARGS_ERROR;
     }
 
     // verify size

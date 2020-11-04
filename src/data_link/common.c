@@ -10,9 +10,13 @@
 #include "../error/error.h"
 
 int count, success;
+char last_frame[MAX_FRAME_SIZE];
+int last_frame_size = 0;
 
 void define_rej_frame(char* rej_frame, int sequence_number);
-int parse_data(int data_size, char* data_array, int fd, int i, char* frame, int sequence_number, char* buffer);
+int parse_data(int data_size, char* data_array, int fd, int i, char* frame, int sequence_number);
+void apply_errors(char* buf);
+bool verify_repeated(bool sequence_correct, char* frame, int i);
 
 int send_retransmission_frame(int fd, char* frame, unsigned frame_size, char* type, enum frame answer_type, bool sender_to_receiver) {
     (void)signal(SIGALRM, alarm_handler);
@@ -109,24 +113,21 @@ int receive_data_frame(int fd, int sequence_number, char* buffer) {
 
     // define message construct
     char control = get_control(I, sequence_number);
-    MessageConstruct construct = { .address = ADDRESS_SENDER_RECEIVER, .control = control, .data = TRUE };
+    char inverse_control = get_control(I, !sequence_number);
+    MessageConstruct construct = { .address = ADDRESS_SENDER_RECEIVER, .control = control, .inverse_control = inverse_control, .data = TRUE };
     enum set_state state = START;
 
     char buf[255] = { 0 };
-
+    bool sequence_correct = TRUE;
     unsigned int i = 0;
     while (success) {
         // read from the port
         int res = read(fd, buf, 1);
         if (res <= 0) continue;
 
-        // int percentage = rand() % 1024; // TEST random errors
-        // if (percentage == 19) {
-        //     buf[0] = 0x00;
-        //     // printf("Bit lost!\n");
-        // }
+        apply_errors(buf);
 
-        // printf("%x ", buf[0]); // TEST
+        // printf("%x \n", buf[0]); // TEST
 
         // destuffing
         if (buf[0] == ESCAPE) {
@@ -140,14 +141,15 @@ int receive_data_frame(int fd, int sequence_number, char* buffer) {
         }
 
         // update machine states
-        update_state(&state, buf[0], construct);
+        if (!update_state(&state, buf[0], construct))
+            sequence_correct = FALSE;
 
         // reset if finds flag for the first time
         if (state == FLAG_RCV)
             i = 0;
         else if (state == STOP) { // terminate if reads all
             data_size = i - 5; // i + 1 is the frame size i + 1 - 6, minus the non data flags
-            data_size = parse_data(data_size, buffer, fd, i, frame, sequence_number, buffer);
+            data_size = parse_data(data_size, buffer, fd, i, frame, sequence_number);
             if (data_size < 0) {
                 success = FALSE;
             }
@@ -163,12 +165,15 @@ int receive_data_frame(int fd, int sequence_number, char* buffer) {
         i++;
     }
 
-    // printf("\nFIM\n"); // TEST
+    bool equal = verify_repeated(sequence_correct, frame, i);
+
+    if (equal)
+        return REPEATED_FRAME_ERROR;
 
     return data_size;
 }
 
-int parse_data(int data_size, char* data_array, int fd, int i, char* frame, int sequence_number, char* buffer) {
+int parse_data(int data_size, char* data_array, int fd, int i, char* frame, int sequence_number) {
     resize_array(frame, i, data_array, 4, data_size);
     char bcc2_result = xor_array(data_size, data_array);
 
@@ -178,7 +183,6 @@ int parse_data(int data_size, char* data_array, int fd, int i, char* frame, int 
 
         send_unanswered_frame(fd, rej_frame, 5, "REJ");
         return LOST_FRAME_ERROR;
-        // return receive_data_frame(fd, sequence_number, buffer);
     }
 
     return data_size;
@@ -198,6 +202,39 @@ void define_ua_frame(char* ua_frame, int sender_to_receiver) {
 /*******************************************************
  *                  PRIVATE FUNCTIONS                  *
 ********************************************************/
+
+bool verify_repeated(bool sequence_correct, char* frame, int i) {
+    bool equal = FALSE;
+    // if the sequence number was wrong
+    if (!sequence_correct) {
+        equal = TRUE;
+
+        // verify if frame is equal to the last one
+        for (int j = 0; j < i && j < last_frame_size && equal; ++j)
+            if (frame[j] != last_frame[j])
+                equal = FALSE;
+    }
+
+    // save current frame for the next iteration
+    for (int j = 0; j < i; ++j)
+        last_frame[j] = frame[i];
+    last_frame_size = i;
+
+    return equal;
+}
+
+void apply_errors(char* buf) {
+    usleep(TPROP);
+
+    // incite random errors
+    if (BER) {
+        int percentage = rand() % BER;
+        if (percentage == 1) {
+            buf[0] = 0x00;
+            if (OUTPUT) printf("Bit lost!\n");
+        }
+    }
+}
 
 void alarm_handler() {
     if (OUTPUT) printf("alarm # %d\n", ++count);

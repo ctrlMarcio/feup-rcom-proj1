@@ -6,7 +6,11 @@
 
 #pragma once
 
-#define OUTPUT 0
+#define OUTPUT 1
+
+#define BER 0 // 0 for turned off
+
+#define TPROP 0 // in microsseconds. 0 for turned off, 1 for every bit, more than that for a percentage of 1/TPROP
 
 /**
  * @brief States the beginning and end of a message.
@@ -94,6 +98,7 @@ typedef struct MessageConstructor
 {
     char address;
     char control;
+    char inverse_control;
     int data;
 } MessageConstruct;
 

@@ -36,6 +36,8 @@ enum entity {
     RECEIVER
 };
 
+enum unit_measure {B, KB, MB, GB};
+
 int check_sender_arguments(int argc, char **argv, char **filename);
 
 int check_receiver_arguments(int argc, char **argv);
@@ -88,3 +90,11 @@ long get_file_size(char *filename);
 bool replace_file(char *filename);
 
 void print_progess(int total_read, int size, clock_t start);
+
+long to_bytes(int amount, enum unit_measure unit);
+
+unsigned char amount_octets(long total_bytes);
+
+void size_in_octets(long file_size, char* size_in_octets, unsigned arr_size);
+
+long octets_to_size(unsigned char* octets, int octets_length);

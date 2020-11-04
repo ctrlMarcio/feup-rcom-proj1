@@ -2,7 +2,9 @@
 
 #include "../../util/util.h"
 
-void update_state(enum set_state *state, char message, MessageConstruct construct) {
+bool update_state(enum set_state *state, char message, MessageConstruct construct) {
+    bool correct = TRUE;
+
     switch (*state) {
         case START:
             if (message == FRAME_FLAG)
@@ -19,6 +21,10 @@ void update_state(enum set_state *state, char message, MessageConstruct construc
         case A_RCV:
             if (message == construct.control)
                 *state = C_RCV;
+            else if (message == construct.inverse_control) {
+                *state = C_RCV;
+                correct = FALSE;
+            }
             else if (message == FRAME_FLAG)
                 *state = FLAG_RCV;
             else
@@ -53,6 +59,8 @@ void update_state(enum set_state *state, char message, MessageConstruct construc
         default:
             break;
     }
+
+    return correct;
 }
 
 // 😍

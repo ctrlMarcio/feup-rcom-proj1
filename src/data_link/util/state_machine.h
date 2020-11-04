@@ -7,7 +7,8 @@
 #pragma once
 
 #include "serial_port.h"
+#include "../../util/util.h"
 
 enum set_state{START, FLAG_RCV, A_RCV, C_RCV, BCC_OK, DATA, BCC2_OK, STOP};
 
-void update_state(enum set_state *state, char message, MessageConstruct construct);
+bool update_state(enum set_state *state, char message, MessageConstruct construct);

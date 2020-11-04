@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 #include <sys/stat.h>
 
 #include "../data_link/util/serial_port.h"
@@ -10,7 +11,7 @@
 
 int check_sender_arguments(int argc, char** argv, char** filename) {
     if (argc != 2 && argc != 3)
-        return ARGS_ERROR;
+        return SENDER_ARGS_ERROR;
 
     bool virtual = FALSE;
     if (argc == 3) {
@@ -19,7 +20,7 @@ int check_sender_arguments(int argc, char** argv, char** filename) {
         else if (!strcmp(argv[2], VIRTUAL_PORTS_FLAG) || !strcmp(argv[2], VIRTUAL_PORTS_EXTENDED_FLAG))
             *filename = argv[1];
         else
-            return ARGS_ERROR;
+            return SENDER_ARGS_ERROR;
         virtual = TRUE;
     }
     else {
@@ -31,13 +32,13 @@ int check_sender_arguments(int argc, char** argv, char** filename) {
 
 int check_receiver_arguments(int argc, char** argv) {
     if (argc > 2)
-        return ARGS_ERROR;
+        return RECEIVER_ARGS_ERROR;
     bool virtual = FALSE;
     if (argc == 2) {
         if (!strcmp(argv[1], VIRTUAL_PORTS_FLAG) || !strcmp(argv[1], VIRTUAL_PORTS_EXTENDED_FLAG))
             virtual = TRUE;
         else
-            return ARGS_ERROR;
+            return RECEIVER_ARGS_ERROR;
     }
 
     return virtual;
@@ -166,4 +167,43 @@ void print_progess(int total_read, int size, clock_t start) {
 
         printf("\e[?25l\r%.1f%% [%.*s%.*s]    %0.2fs elapsed    %0.2f %s    %0.2f %s    %0.2f%s remaining%.*s", percentage, progress, "####################", 20 - progress, "                     ", elapsed, read, type, speed, speed_type, remaining, time, 10, "                     ");
     }
+}
+
+long to_bytes(int amount, enum unit_measure unit) {
+    long value = (long)amount;
+
+    for (enum unit_measure tmp = unit; tmp > 0; tmp--)
+        value *= 1024;
+
+    return value;
+}
+
+unsigned char amount_octets(long total_bytes) {
+    int bit_amount = ceil(log2(total_bytes));
+    int byte_amount = bit_amount / 8;
+    if (bit_amount % 8)
+        byte_amount++;
+
+    return byte_amount;
+}
+
+void size_in_octets(long file_size, char* size_in_octets, unsigned arr_size) {
+    char octet = (unsigned char)file_size;
+
+    for (int i = arr_size - 1; i >= 0; --i) {
+        size_in_octets[i] = octet;
+        file_size = file_size >> 8;
+        octet = (unsigned char)file_size;
+    }
+}
+
+long octets_to_size(unsigned char* octets, int octets_length) {
+    long size = 0;
+    
+    for (int i = 0; i < octets_length; ++i) {
+        size <<= 8;
+        size |= octets[i];
+    }
+
+    return size;
 }

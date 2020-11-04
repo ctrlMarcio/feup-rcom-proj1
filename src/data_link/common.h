@@ -6,7 +6,7 @@
 /**
  * @brief Defines the timeout between attempts in seconds.
  */
-#define TIMEOUT 3
+#define TIMEOUT 5
 
 /**
  * @brief Defines the number of attempts per message sent.

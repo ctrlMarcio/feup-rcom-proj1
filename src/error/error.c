@@ -5,7 +5,11 @@
 #include "../application/util/application.h"
 
 void print_args_error(char* program_name) {
-    fprintf(stderr, "Program called with errors.\n<%s> [%s] <filename>\n", program_name, VIRTUAL_PORTS_FLAG);
+    fprintf(stderr, "Program called with errors. Usage:\n%s [%s] <filename>\n", program_name, VIRTUAL_PORTS_FLAG);
+}
+
+void print_receiver_args_error(char* program_name) {
+    fprintf(stderr, "Program called with errors. Usage:\n%s [%s]\n", program_name, VIRTUAL_PORTS_FLAG);
 }
 
 void print_config_port_error(char* port) {
@@ -50,8 +54,12 @@ void print_existing_file_error(char * filename){
 
 void print_error(int error_code) {
     switch (error_code) {
-    case ARGS_ERROR:
+    case SENDER_ARGS_ERROR:
         print_args_error("progam_name");
+        break;
+
+    case RECEIVER_ARGS_ERROR:
+        print_receiver_args_error("program_name");
         break;
 
     case CONFIG_PORT_ERROR:
@@ -93,8 +101,12 @@ void print_error(int error_code) {
 
 void print_error_message(int error_code, char* arg) {
     switch (error_code) {
-    case ARGS_ERROR:
+    case SENDER_ARGS_ERROR:
         print_args_error(arg);
+        break;
+
+    case RECEIVER_ARGS_ERROR:
+        print_receiver_args_error(arg);
         break;
 
     case CONFIG_PORT_ERROR:
