@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "application_packet.h"
 #include "util/application.h"
 #include "../util/util.h"
 #include "../data_link/data_link.h"
@@ -50,7 +49,6 @@ long receive_data_packet(char* data) {
 }
 
 int receive_end_control_packet(char * file_name, long total_read){
-
     char received_file_name[MAX_FILE_NAME_SIZE];
     char buffer[MAX_FRAME_SIZE];
     int read_bytes = llread(fd, buffer);
@@ -87,7 +85,7 @@ long parse_control_packet(char* file_name, char* packet, int packet_size, bool s
 
         switch (type)
         {
-        case TYPE_FILE_SIZE:
+        case FILE_SIZE_TYPE:
             l1 = packet[i];
             v1 = (unsigned char*)malloc(sizeof(unsigned char) * l1);
 
@@ -98,7 +96,7 @@ long parse_control_packet(char* file_name, char* packet, int packet_size, bool s
 
             break;
 
-        case TYPE_FILE_NAME:
+        case FILE_NAME_TYPE:
             l2 = packet[i];
 
             for (int j = 0; j < l2; j++)

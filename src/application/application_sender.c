@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "application_packet.h"
 #include "util/application.h"
 #include "../util/util.h"
 #include "../data_link/data_link.h"
@@ -91,14 +90,14 @@ void build_control_packet(char* control_packet, int file_size, enum unit_measure
     else
         control = CONTROL_END;
 
-    char t1 = TYPE_FILE_SIZE;
+    char t1 = FILE_SIZE_TYPE;
 
     long bytes = to_bytes(file_size, unit);
     unsigned char l1 = amount_octets(bytes);
     char v1[l1];
     size_in_octets(bytes, v1, l1);
 
-    char t2 = TYPE_FILE_NAME;
+    char t2 = FILE_NAME_TYPE;
     int l2 = strlen(file_name);
     int i = 0;
 

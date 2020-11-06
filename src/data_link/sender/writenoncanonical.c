@@ -50,19 +50,12 @@ int define_message_frame(char* message, char* data, int data_size, int sequence_
 }
 
 int send_information_frame(int fd, char* message, int frame_size, int sequence_number) {
-    (void)signal(SIGALRM, alarm_handler);
-
     count = 0, success = 0;
 
     // receives the answer_frame
     while (count < NR_ATTEMPTS) {
         if (success)
             break;
-
-        // TEST
-        // for (int i = 0; i < frame_size; ++i)
-        //     printf("%x ", message[i]);
-        // printf("\nFIM\n");
 
         // sends the frame
         int res = write(fd, message, sizeof(char) * frame_size);
@@ -78,9 +71,7 @@ int send_information_frame(int fd, char* message, int frame_size, int sequence_n
     return !success;
 }
 
-int send_disc_frame(int fd, char *disc_frame) {
-    (void)signal(SIGALRM, alarm_handler);
-
+int send_disc_frame(int fd, char* disc_frame) {
     count = 0, success = 0;
 
     // receives the answer_frame
@@ -123,10 +114,10 @@ int read_ua_answer(int fd) {
     success = 1;
     int i = 0;
 
-    MessageConstruct ua = {.address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_UA, .data = FALSE};
+    MessageConstruct ua = { .address = ADDRESS_SENDER_RECEIVER, .control = CONTROL_UA, .data = FALSE };
     enum set_state rr_state = START;
 
-    char buf[255] = {0};
+    char buf[255] = { 0 };
 
     while (success) {
         int res = read(fd, buf, 1);
@@ -152,16 +143,16 @@ int read_receiver_answer(int fd, int sequence_number) {
     char control_rr = CONTROL_RR_ONE;
     if (sequence_number) control_rr = CONTROL_RR_ZERO;
 
-    MessageConstruct rr = {.address = ADDRESS_SENDER_RECEIVER, .control = control_rr, .data = FALSE};
+    MessageConstruct rr = { .address = ADDRESS_SENDER_RECEIVER, .control = control_rr, .data = FALSE };
     enum set_state rr_state = START;
 
     char control_rej = CONTROL_REJ_ONE;
     if (sequence_number) control_rej = CONTROL_REJ_ZERO;
 
-    MessageConstruct rej = {.address = ADDRESS_RECEIVER_SENDER, .control = control_rej, .data = FALSE};
+    MessageConstruct rej = { .address = ADDRESS_RECEIVER_SENDER, .control = control_rej, .data = FALSE };
     enum set_state rej_state = START;
 
-    char buf[1] = {0};
+    char buf[1] = { 0 };
 
     while (success) {
         int res = read(fd, buf, 1);
@@ -175,7 +166,8 @@ int read_receiver_answer(int fd, int sequence_number) {
         else if (rr_state == STOP) {
             success = 1;
             break;
-        } else if (rej_state == STOP) {  // if it reads a REJ frame, returns unsuccess
+        }
+        else if (rej_state == STOP) {  // if it reads a REJ frame, returns unsuccess
             alarm(0);                    // anticipates alarm
             alarm_handler();
             break;
@@ -188,8 +180,6 @@ int read_receiver_answer(int fd, int sequence_number) {
 }
 
 int connect_to_receiver(int fd, char* set_frame) {
-    (void)signal(SIGALRM, alarm_handler);
-
     // receives the answer_frame
     while (count < NR_ATTEMPTS) {
         if (success)

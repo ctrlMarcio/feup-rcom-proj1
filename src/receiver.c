@@ -20,6 +20,9 @@ int main(int argc, char** argv) {
         return RECEIVER_ARGS_ERROR;
     }
 
+    // subscribe to the interrupts
+    subscribe_alarm_interruptions();
+
     char filename[MAX_FILE_NAME_SIZE];
     long size;
     if ((size = receive_start_control_packet(filename, virtual)) < 0)

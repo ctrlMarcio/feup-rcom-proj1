@@ -43,4 +43,4 @@ void define_ua_frame(char* ua_frame, int sender_to_receiver);
  */
 void alarm_handler();
 
-
+void subscribe_alarm_interruptions();

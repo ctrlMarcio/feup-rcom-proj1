@@ -1,7 +1,6 @@
 /**
  * @file readnoncanonical.h
- * @brief 
- * @date 2020-10-11
+ * @brief Stats important functions for non canonical reading at data link level.
  */
 
 #pragma once
@@ -12,12 +11,19 @@
 #include "../common.h"
 
 /**
- * @brief 
+ * @brief Establishes connection as the receiver, reading a SET and sending an UA.
  *
- * @param fd 
+ * @param fd    the fd of the port.
  */
 void answer_establishment(int fd);
 
+/**
+ * @brief Reads an information frame and sends the appropriate response.
+ * 
+ * @param fd        the fd of the port.
+ * @param buffer    the buffer to read the data to.
+ * @return int      the size of the data, negative in case of error.
+ */
 int answer_information(int fd, char *buffer);
 
 /**

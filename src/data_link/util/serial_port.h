@@ -1,16 +1,24 @@
 /**
  * @file    serial_port.h
- * @brief   Defines flags related to the serial port.
- * @date    2020-10-11
+ * @brief   Defines flags related to the data link.
  */
 
 #pragma once
 
-#define OUTPUT 1
+/**
+ * @brief The flag that indicates if the print of frame transference should be present.
+ */
+#define OUTPUT 0
 
-#define BER 0 // 0 for turned off
+/**
+ * @brief The virtual bit error ratio, 0 for turned off. 1/BER percentage for BER > 0.
+ */
+#define BER 0 
 
-#define TPROP 0 // in microsseconds. 0 for turned off, 1 for every bit, more than that for a percentage of 1/TPROP
+/**
+ * @brief The virtual propagation time in milliseconds.
+ */
+#define TPROP 0
 
 /**
  * @brief States the beginning and end of a message.

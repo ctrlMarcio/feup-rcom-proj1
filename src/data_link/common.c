@@ -19,7 +19,6 @@ void apply_errors(char* buf);
 bool verify_repeated(bool sequence_correct, char* frame, int i);
 
 int send_retransmission_frame(int fd, char* frame, unsigned frame_size, char* type, enum frame answer_type, bool sender_to_receiver) {
-    (void)signal(SIGALRM, alarm_handler);
     count = 0, success = 0;
 
     while (count < NR_ATTEMPTS) {
@@ -247,4 +246,13 @@ void define_rej_frame(char* rej_frame, int sequence_number) {
     rej_frame[2] = get_control(REJ, sequence_number);
     rej_frame[3] = XOR(rej_frame[1], rej_frame[2]);
     rej_frame[4] = FRAME_FLAG;
+}
+
+void subscribe_alarm_interruptions() {
+    struct sigaction action;
+    action.sa_handler = alarm_handler;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+
+    sigaction(SIGALRM, &action, NULL);
 }

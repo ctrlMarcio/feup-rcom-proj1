@@ -24,6 +24,9 @@ int main(int argc, char** argv) {
 
     int error; // placeholder to store errors
 
+    // subscribe to the interrupts
+    subscribe_alarm_interruptions();
+
     // send start control packet
     if ((error = send_start_control_packet(size, B, filename, virtual)) < 0)
         return error;
