@@ -30,9 +30,9 @@ int send_retransmission_frame(int fd, char* frame, unsigned frame_size, char* ty
         if (OUTPUT) printf("%d bytes sent in a %s frame\n", res, type);
 
         if (answer_type == UA)
-            receive_frame(fd, 5, UA, sender_to_receiver, FALSE);
+            receive_frame(fd, UA, sender_to_receiver, FALSE);
         else if (answer_type == DISC)
-            receive_frame(fd, 5, DISC, !sender_to_receiver, FALSE); // !sender_to_receiver bc DISC is not an answer, is a new request
+            receive_frame(fd, DISC, !sender_to_receiver, FALSE); // !sender_to_receiver bc DISC is not an answer, is a new request
     }
 
     return !success;
@@ -47,7 +47,7 @@ int send_unanswered_frame(int fd, char* frame, unsigned frame_size, char* type) 
     return 0;
 }
 
-int receive_frame(int fd, unsigned size, enum frame frame_type, bool sender_to_receiver, bool expect_rej) {
+int receive_frame(int fd, enum frame frame_type, bool sender_to_receiver, bool expect_rej) {
     if (frame_type == I) // compatibility ig
         return 1;
 

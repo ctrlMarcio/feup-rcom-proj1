@@ -47,70 +47,92 @@
  */
 #define CONTROL_UA 0x07
 
+/**
+ * @brief States the control flag for the DISC message.
+ */
 #define CONTROL_DISC 0x0b
 
 /**
- * @brief States the control flag for the I message (one).
- * 
+ * @brief States the control flag for the I message with the sequence number as 1.
  */
 #define CONTROL_I_ONE 0x40
 
 
 /**
- * @brief States the control flag for the I message (zero).
- * 
+ * @brief States the control flag for the I message with the sequence number as 0.
  */
 #define CONTROL_I_ZERO 0x00
 
 /**
- *
+ * @brief States the control flag for the RR message with the sequence number as 1.
  */
 #define CONTROL_RR_ONE 0x85
 
 /**
- *
+ * @brief States the control flag for the RR message with the sequence number as 0.
  */
 #define CONTROL_RR_ZERO 0x05
 
 /**
-*
-*/
+ * @brief States the control flag for the REJ message with the sequence number as 1.
+ */
 #define CONTROL_REJ_ONE 0x81
 
 /**
- *
-*/
+ * @brief States the control flag for the REJ message with the sequence number as 0.
+ */
 #define CONTROL_REJ_ZERO 0x01
 
 /**
- *
+ * @brief The flag that XORs with the byte to stuff.
  */
 #define STUFF_FLAG 0x20
 
 /**
- *
+ * @brief The max size of a frame in bytes.
  */
-#define MAX_FRAME_SIZE 102400 // 100 KByte
-
-#define MAX_PACKET_SIZE (MAX_FRAME_SIZE + 4) // 100 KByte
+#define MAX_FRAME_SIZE 102400 // 100 KBs
 
 /**
- *
+ * @brief The max size of a packet in bytes.
+ */
+#define MAX_PACKET_SIZE (MAX_FRAME_SIZE + 4) // 100 KBs
+
+/**
+ * @brief The possible frame types.
  */
 enum frame{NONE, UA, SET, I, RR, REJ, DISC};
 
 /**
- *
+ * @brief The required fields of a message.
  */
-typedef struct MessageConstructor
-{
+typedef struct MessageConstructor {
+    /**
+     * @brief The messsage address.
+     */
     char address;
+
+    /**
+     * @brief The message control.
+     */
     char control;
+
+    /**
+     * @brief The control of the inverse sequence number of the message.
+     */
     char inverse_control;
+
+    /**
+     * @brief The boolean that states if frame brings data.
+     */
     int data;
 } MessageConstruct;
 
 /**
- *
+ * @brief Gets the control byte, given the frame type and the sequence number.
+ * 
+ * @param type              the frame type.
+ * @param sequence_number   the sequence number.
+ * @return char             the control byte.
  */
 char get_control(enum frame type, int sequence_number);

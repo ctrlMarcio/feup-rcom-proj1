@@ -137,7 +137,7 @@ int close_sender(int fd) {
 }
 
 int close_receiver(int fd) {
-    if (receive_frame(fd, 5, DISC, TRUE, FALSE))
+    if (receive_frame(fd, DISC, TRUE, FALSE))
         return CLOSE_CONNECTION_ERROR;
 
     char disc_frame[5];
