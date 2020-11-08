@@ -1,0 +1,24 @@
+name: Create Release
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: make
+      - name: Release 🚀
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            bin/sender
+            bin/receiver
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

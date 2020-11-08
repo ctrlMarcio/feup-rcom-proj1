@@ -198,9 +198,9 @@ void define_ua_frame(char* ua_frame, int sender_to_receiver) {
     ua_frame[4] = FRAME_FLAG;
 }
 
-/*******************************************************
- *                  PRIVATE FUNCTIONS                  *
-********************************************************/
+/* ******************************************************************* */
+/* ************************ PRIVATE FUNCTIONS ************************ */
+/* ******************************************************************* */
 
 bool verify_repeated(bool sequence_correct, char* frame, int i) {
     bool equal = FALSE;

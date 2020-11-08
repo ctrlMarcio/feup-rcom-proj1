@@ -101,6 +101,10 @@ int terminate_sender_connection(int fd, struct termios* oldtio) {
     return 0;
 }
 
+/* ******************************************************************* */
+/* ************************ PRIVATE FUNCTIONS ************************ */
+/* ******************************************************************* */
+
 void define_set_frame(char* set_frame) {
     set_frame[0] = FRAME_FLAG;
     set_frame[1] = ADDRESS_SENDER_RECEIVER;

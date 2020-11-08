@@ -64,7 +64,9 @@ int receive_end_control_packet(char * file_name, long total_read){
 }
 
 
-// PRIVATE FUNCTIONS
+/* ******************************************************************* */
+/* ************************ PRIVATE FUNCTIONS ************************ */
+/* ******************************************************************* */
 
 long parse_control_packet(char* file_name, char* packet, int packet_size, bool start) {
     

@@ -71,8 +71,9 @@ int send_end_control_packet(int file_size, enum unit_measure unit, char* file_na
 
 }
 
-
-// PRIVATE FUNCTIONS
+/* ******************************************************************* */
+/* ************************ PRIVATE FUNCTIONS ************************ */
+/* ******************************************************************* */
 
 int get_packet_size(int file_size, enum unit_measure unit, char* file_name) {
     long bytes = to_bytes(file_size, unit);

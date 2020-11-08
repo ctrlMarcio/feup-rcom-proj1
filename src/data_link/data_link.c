@@ -82,7 +82,9 @@ int llclose(int fd) {
         return close_receiver(fd);
 }
 
-// private functions
+/* ******************************************************************* */
+/* ************************ PRIVATE FUNCTIONS ************************ */
+/* ******************************************************************* */
 
 int open_serial_port(char* port) {
     struct termios newtio;
