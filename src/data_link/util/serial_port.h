@@ -13,7 +13,7 @@
 /**
  * @brief The virtual bit error ratio, 0 for turned off. 1/BER percentage for BER > 0.
  */
-#define BER 0 
+#define BER 0
 
 /**
  * @brief The virtual propagation time in milliseconds.

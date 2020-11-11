@@ -228,7 +228,7 @@ void apply_errors(char* buf) {
     // incite random errors
     if (BER) {
         int percentage = rand() % BER;
-        if (percentage == 1) {
+        if (percentage == 0) {
             buf[0] = 0x00;
             if (OUTPUT) printf("Bit lost!\n");
         }
